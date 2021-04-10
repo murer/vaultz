@@ -15,9 +15,11 @@ func TestPoc(t *testing.T) {
 
 	pub := kp.ExportPub()
 	fmt.Println(pub)
+	assert.NotNil(t, pub)
 
 	priv := kp.ExportPub()
 	fmt.Println(priv)
+	assert.NotNil(t, priv)
 
 	// Add more identities here if you wish
 
