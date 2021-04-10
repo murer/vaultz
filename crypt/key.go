@@ -6,9 +6,14 @@ import (
 	"golang.org/x/crypto/openpgp"
 )
 
-func KeyGen(name string, email string) *openpgp.Entity {
-	var e *openpgp.Entity
-	e, err := openpgp.NewEntity(name, name, email, nil)
+type KeyPair struct {
+	pgpkey *openpgp.Entity
+}
+
+func (me *KeyPair) Generate(name string, email string) *KeyPair {
+	var pgpkey *openpgp.Entity
+	pgpkey, err := openpgp.NewEntity(name, name, email, nil)
 	util.Check(err)
-	return e
+	me.pgpkey = pgpkey
+	return me
 }

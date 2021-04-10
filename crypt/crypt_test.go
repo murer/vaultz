@@ -14,7 +14,8 @@ import (
 func TestPoc(t *testing.T) {
 	assert.Equal(t, 1, 1)
 
-	key := KeyGen("test", "test@sample.com")
+	kp := &KeyPair{}
+	kp.Generate("test", "test@sample.com")
 
 	// Add more identities here if you wish
 
@@ -43,5 +44,5 @@ func TestPoc(t *testing.T) {
 	}
 	defer s.Close()
 
-	key.SerializePrivate(s, nil)
+	kp.pgpkey.SerializePrivate(s, nil)
 }
