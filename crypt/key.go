@@ -2,9 +2,8 @@ package crypt
 
 import (
 	"bytes"
+	"encoding/hex"
 	"strings"
-
-	"golang.org/x/crypto/openpgp/packet"
 
 	"github.com/murer/vaultz/crypt/util"
 	"golang.org/x/crypto/openpgp/armor"
@@ -48,22 +47,28 @@ func (me *KeyPair) ExportPriv() string {
 }
 
 func (me *KeyPair) Import(encodedKey string) *KeyPair {
-	blk, err := armor.Decode(strings.NewReader(encodedKey))
-	util.Check(err)
-	reader := packet.NewReader(blk.Body)
-	pgpkey, err := openpgp.ReadEntity(reader)
-	util.Check(err)
-	me.pgpkey = pgpkey
-	// for {
-	// 	fmt.Println("Reading")
-	// 	pkt, err := reader.Next()
-	// 	util.Check(err)
-	// 	fmt.Printf("AA %#v \n", pkt)
-	// }
+	// blk, err := armor.Decode(strings.NewReader(encodedKey))
+	// util.Check(err)
+	// reader := packet.NewReader(blk.Body)
+	// pgpkey, err := openpgp.ReadEntity(reader)
+	// util.Check(err)
+	// me.pgpkey = pgpkey
 
-	// key, ok := pkt.(*packet.PrivateKey)
-	// if !ok {
-	// 	util.Fatal("Not private key")
+	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
+	util.Check(err)
+	// for i, s := range lst {
+	// 	fmt.Printf("AAA: %v = %v", i, s)
 	// }
+	me.pgpkey = lst[0]
 	return me
+}
+
+func (me *KeyPair) PubFingerprint() string {
+	var bar []byte = me.pgpkey.PrimaryKey.Fingerprint[:]
+	return hex.EncodeToString(bar)
+}
+
+func (me *KeyPair) PrivFingerprint() string {
+	var bar []byte = me.pgpkey.PrivateKey.Fingerprint[:]
+	return hex.EncodeToString(bar)
 }
