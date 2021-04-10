@@ -12,8 +12,12 @@ func TestPoc(t *testing.T) {
 
 	kp := &KeyPair{}
 	kp.Generate("test", "test@sample.com")
+
 	pub := kp.ExportPub()
 	fmt.Println(pub)
+
+	priv := kp.ExportPub()
+	fmt.Println(priv)
 
 	// Add more identities here if you wish
 

@@ -28,3 +28,11 @@ func (me *KeyPair) ExportPub() string {
 	me.pgpkey.Serialize(a)
 	return buf.String()
 }
+
+func (me *KeyPair) ExportPriv() string {
+	buf := new(bytes.Buffer)
+	a, err := armor.Encode(buf, openpgp.PrivateKeyType, nil)
+	util.Check(err)
+	me.pgpkey.SerializePrivate(a, nil)
+	return buf.String()
+}
