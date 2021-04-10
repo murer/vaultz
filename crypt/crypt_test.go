@@ -14,12 +14,7 @@ import (
 func TestPoc(t *testing.T) {
 	assert.Equal(t, 1, 1)
 
-	var e *openpgp.Entity
-	e, err := openpgp.NewEntity("itis", "test", "itis@itis3.com", nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	key := KeyGen("test", "test@sample.com")
 
 	// Add more identities here if you wish
 
@@ -48,5 +43,5 @@ func TestPoc(t *testing.T) {
 	}
 	defer s.Close()
 
-	e.SerializePrivate(s, nil)
+	key.SerializePrivate(s, nil)
 }
