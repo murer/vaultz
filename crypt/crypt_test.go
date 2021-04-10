@@ -24,20 +24,29 @@ func TestPoc(t *testing.T) {
 	// Add more identities here if you wish
 
 	// Sign all the identities
-	for _, id := range e.Identities {
-		err := id.SelfSignature.SignUserId(id.UserId.Id, e.PrimaryKey, e.PrivateKey, nil)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
+	// for _, id := range e.Identities {
+	// 	err := id.SelfSignature.SignUserId(id.UserId.Id, e.PrimaryKey, e.PrivateKey, nil)
+	// 	if err != nil {
+	// 		fmt.Println(err)
+	// 		return
+	// 	}
+	// }
 
-	w, err := armor.Encode(os.Stdout, openpgp.PublicKeyType, nil)
+	// w, err := armor.Encode(os.Stdout, openpgp.PublicKeyType, nil)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// defer w.Close()
+
+	// e.Serialize(w)
+
+	s, err := armor.Encode(os.Stdout, openpgp.PrivateKeyType, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer w.Close()
+	defer s.Close()
 
-	e.Serialize(w)
+	e.SerializePrivate(s, nil)
 }
