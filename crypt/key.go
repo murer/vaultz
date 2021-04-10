@@ -25,7 +25,9 @@ func (me *KeyPair) ExportPub() string {
 	buf := new(bytes.Buffer)
 	a, err := armor.Encode(buf, openpgp.PublicKeyType, nil)
 	util.Check(err)
-	me.pgpkey.Serialize(a)
+	defer a.Close()
+	util.Check(me.pgpkey.Serialize(a))
+	a.Close()
 	return buf.String()
 }
 
@@ -33,6 +35,8 @@ func (me *KeyPair) ExportPriv() string {
 	buf := new(bytes.Buffer)
 	a, err := armor.Encode(buf, openpgp.PrivateKeyType, nil)
 	util.Check(err)
+	defer a.Close()
 	me.pgpkey.SerializePrivate(a, nil)
+	a.Close()
 	return buf.String()
 }

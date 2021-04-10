@@ -37,7 +37,7 @@ func TestPoc(t *testing.T) {
 	// }
 	// defer w.Close()
 
-	// e.Serialize(w)
+	// kp.pgpkey.Serialize(w)
 
 	// s, err := armor.Encode(os.Stdout, openpgp.PrivateKeyType, nil)
 	// if err != nil {
