@@ -14,10 +14,15 @@ func TestPoc(t *testing.T) {
 	assert.NotNil(t, kp.ExportPub())
 	assert.NotNil(t, kp.ExportPriv())
 
-	deckp := &KeyPair{}
-	deckp.Import(kp.ExportPub())
-	assert.Equal(t, kp.ExportPub(), deckp.ExportPub())
-	assert.Equal(t, "", deckp.ExportPriv())
+	pubkp := &KeyPair{}
+	pubkp.Import(kp.ExportPub())
+	assert.Equal(t, kp.ExportPub(), pubkp.ExportPub())
+	assert.Equal(t, "", pubkp.ExportPriv())
+
+	privkp := &KeyPair{}
+	privkp.Import(kp.ExportPriv())
+	assert.Equal(t, kp.ExportPub(), privkp.ExportPub())
+	assert.Equal(t, kp.ExportPriv(), privkp.ExportPriv())
 
 	// Add more identities here if you wish
 
