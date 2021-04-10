@@ -1,7 +1,6 @@
 package crypt
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,14 +11,13 @@ func TestPoc(t *testing.T) {
 
 	kp := &KeyPair{}
 	kp.Generate("test", "test@sample.com")
+	assert.NotNil(t, kp.ExportPub())
+	assert.NotNil(t, kp.ExportPriv())
 
-	pub := kp.ExportPub()
-	fmt.Println(pub)
-	assert.NotNil(t, pub)
-
-	priv := kp.ExportPub()
-	fmt.Println(priv)
-	assert.NotNil(t, priv)
+	deckp := &KeyPair{}
+	deckp.Import(kp.ExportPub())
+	assert.Equal(t, kp.ExportPub(), deckp.ExportPub())
+	assert.Equal(t, "", deckp.ExportPriv())
 
 	// Add more identities here if you wish
 
