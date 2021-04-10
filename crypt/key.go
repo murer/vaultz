@@ -1,7 +1,10 @@
 package crypt
 
 import (
+	"bytes"
+
 	"github.com/murer/vaultz/crypt/util"
+	"golang.org/x/crypto/openpgp/armor"
 
 	"golang.org/x/crypto/openpgp"
 )
@@ -16,4 +19,12 @@ func (me *KeyPair) Generate(name string, email string) *KeyPair {
 	util.Check(err)
 	me.pgpkey = pgpkey
 	return me
+}
+
+func (me *KeyPair) ExportPub() string {
+	buf := new(bytes.Buffer)
+	a, err := armor.Encode(buf, openpgp.PublicKeyType, nil)
+	util.Check(err)
+	me.pgpkey.Serialize(a)
+	return buf.String()
 }

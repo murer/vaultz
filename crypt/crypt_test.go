@@ -2,11 +2,7 @@ package crypt
 
 import (
 	"fmt"
-	"os"
 	"testing"
-
-	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,6 +12,8 @@ func TestPoc(t *testing.T) {
 
 	kp := &KeyPair{}
 	kp.Generate("test", "test@sample.com")
+	pub := kp.ExportPub()
+	fmt.Println(pub)
 
 	// Add more identities here if you wish
 
@@ -37,12 +35,12 @@ func TestPoc(t *testing.T) {
 
 	// e.Serialize(w)
 
-	s, err := armor.Encode(os.Stdout, openpgp.PrivateKeyType, nil)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer s.Close()
+	// s, err := armor.Encode(os.Stdout, openpgp.PrivateKeyType, nil)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// defer s.Close()
 
-	kp.pgpkey.SerializePrivate(s, nil)
+	// kp.pgpkey.SerializePrivate(s, nil)
 }
