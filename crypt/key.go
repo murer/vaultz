@@ -46,18 +46,8 @@ func (me *KeyPair) ExportPriv() string {
 }
 
 func (me *KeyPair) Import(encodedKey string) *KeyPair {
-	// blk, err := armor.Decode(strings.NewReader(encodedKey))
-	// util.Check(err)
-	// reader := packet.NewReader(blk.Body)
-	// pgpkey, err := openpgp.ReadEntity(reader)
-	// util.Check(err)
-	// me.pgpkey = pgpkey
-
 	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
 	util.Check(err)
-	// for i, s := range lst {
-	// 	fmt.Printf("AAA: %v = %v", i, s)
-	// }
 	me.pgpkey = lst[0]
 	return me
 }
