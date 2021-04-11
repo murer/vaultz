@@ -22,3 +22,7 @@ func (me *KeyRing) toPgpEntityList() openpgp.EntityList {
 	}
 	return ret
 }
+
+func (me *KeyRing) first() *KeyPair {
+	return me.kps[0]
+}

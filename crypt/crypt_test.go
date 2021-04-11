@@ -1,17 +1,10 @@
 package crypt
 
 import (
-	"bytes"
-	"io/ioutil"
-	"os"
-
 	"fmt"
 	"testing"
 
-	"github.com/murer/vaultz/util"
-
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/crypto/openpgp"
 )
 
 func TestKeyGen(t *testing.T) {
@@ -57,32 +50,35 @@ func TestCrypt(t *testing.T) {
 	ring := KeyRingCreate(maria, bob)
 	ring.Add(john)
 
-	buf := new(bytes.Buffer)
-	w, err := openpgp.Encrypt(buf, ring.toPgpEntityList(), maria.pgpkey, nil, nil)
-	util.Check(err)
-	w.Write([]byte("mymsg"))
-	w.Close()
+	ciphered := EncryptString("mymsg", ring)
+	fmt.Println(ciphered)
 
-	fbuf, err := os.Create("/tmp/x.txt.pgp")
-	util.Check(err)
-	fbuf.Write(buf.Bytes())
-	fbuf.Close()
+	// buf := new(bytes.Buffer)
+	// w, err := openpgp.Encrypt(buf, ring.toPgpEntityList(), maria.pgpkey, nil, nil)
+	// util.Check(err)
+	// w.Write([]byte("mymsg"))
+	// w.Close()
 
-	m, err := openpgp.ReadMessage(buf, ring.toPgpEntityList(), nil, nil)
-	util.Check(err)
-	fmt.Printf("x: %#v\n", m)
+	// fbuf, err := os.Create("/tmp/x.txt.pgp")
+	// util.Check(err)
+	// fbuf.Write(buf.Bytes())
+	// fbuf.Close()
 
-	fmt.Printf("IsEncrypted: %t\n", m.IsEncrypted)
-	fmt.Printf("IsSigned: %t\n", m.IsSigned)
-	fmt.Printf("IsSymmetricallyEncrypted: %t\n", m.IsSymmetricallyEncrypted)
+	// m, err := openpgp.ReadMessage(buf, ring.toPgpEntityList(), nil, nil)
+	// util.Check(err)
+	// fmt.Printf("x: %#v\n", m)
 
-	data, err := ioutil.ReadAll(m.UnverifiedBody)
-	util.Check(err)
-	fmt.Printf("SignedByKeyId: %s\n", string(data))
-	fmt.Printf("SignatureError: %v\n", m.SignatureError)
-	fmt.Printf("Signature: %#v\n", m.Signature)
+	// fmt.Printf("IsEncrypted: %t\n", m.IsEncrypted)
+	// fmt.Printf("IsSigned: %t\n", m.IsSigned)
+	// fmt.Printf("IsSymmetricallyEncrypted: %t\n", m.IsSymmetricallyEncrypted)
 
-	fmt.Printf("SignedBy: %#v\n", m.SignedBy)
-	assert.Equal(t, maria.pgpkey.PrimaryKey.Fingerprint, m.SignedBy.Entity.PrimaryKey.Fingerprint)
+	// data, err := ioutil.ReadAll(m.UnverifiedBody)
+	// util.Check(err)
+	// fmt.Printf("SignedByKeyId: %s\n", string(data))
+	// fmt.Printf("SignatureError: %v\n", m.SignatureError)
+	// fmt.Printf("Signature: %#v\n", m.Signature)
+
+	// fmt.Printf("SignedBy: %#v\n", m.SignedBy)
+	// assert.Equal(t, maria.pgpkey.PrimaryKey.Fingerprint, m.SignedBy.Entity.PrimaryKey.Fingerprint)
 
 }
