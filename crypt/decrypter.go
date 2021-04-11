@@ -57,7 +57,7 @@ func (me *Decrypter) decryptToTemp() {
 	me.tempFile = f.Name()
 }
 
-func (me *Decrypter) Decrypt() io.Reader {
+func (me *Decrypter) Decrypt() io.ReadCloser {
 	me.decryptToTemp()
 	ret, err := os.Open(me.tempFile)
 	util.Check(err)
@@ -66,6 +66,7 @@ func (me *Decrypter) Decrypt() io.Reader {
 
 func (me *Decrypter) DecryptBytes() []byte {
 	r := me.Decrypt()
+	defer r.Close()
 	ret, err := ioutil.ReadAll(r)
 	util.Check(err)
 	return ret
