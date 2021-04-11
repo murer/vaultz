@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/openpgp/armor"
-	_ "golang.org/x/crypto/ripemd160"
 
 	"fmt"
 	"testing"
