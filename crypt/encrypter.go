@@ -9,17 +9,17 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-type Encrypter struct {
+type encrypter struct {
 	io.WriteCloser
 	armor  io.WriteCloser
 	writer io.WriteCloser
 }
 
-func (me *Encrypter) Write(p []byte) (n int, err error) {
+func (me *encrypter) Write(p []byte) (n int, err error) {
 	return me.writer.Write(p)
 }
 
-func (me *Encrypter) Close() error {
+func (me *encrypter) Close() error {
 	we := me.writer.Close()
 	ae := me.armor.Close()
 	if we != nil {
@@ -33,7 +33,7 @@ func Encrypt(w io.Writer, ring *KeyRing) io.WriteCloser {
 	util.Check(err)
 	ew, err := openpgp.Encrypt(wa, ring.toPgpEntityList(), ring.first().pgpkey, nil, nil)
 	util.Check(err)
-	return &Encrypter{armor: wa, writer: ew}
+	return &encrypter{armor: wa, writer: ew}
 }
 
 func EncryptString(plain string, ring *KeyRing) string {
