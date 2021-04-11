@@ -1,10 +1,20 @@
 package crypt
 
 import (
+	"bytes"
+	"io/ioutil"
+	"strings"
+
+	"golang.org/x/crypto/openpgp/armor"
+	_ "golang.org/x/crypto/ripemd160"
+
 	"fmt"
 	"testing"
 
+	"github.com/murer/vaultz/crypt/util"
+
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/openpgp"
 )
 
 func TestKeyGen(t *testing.T) {
@@ -36,5 +46,44 @@ func TestKeyGen(t *testing.T) {
 }
 
 func TestCrypt(t *testing.T) {
+
+	maria := KeyGenerate("maria", "maria@sample.com")
+	fmt.Printf("maria: %s\n", maria.Id())
+	bob := KeyGenerate("bob", "bob@sample.com")
+	fmt.Printf("bob: %s\n", bob.Id())
+	john := KeyGenerate("john", "john@sample.com")
+	fmt.Printf("john: %s\n", john.Id())
+
+	buf := new(bytes.Buffer)
+	// buf, err := os.Create("/tmp/x.txt.pgp")
+	// util.Check(err)
+	w, err := openpgp.Encrypt(buf, []*openpgp.Entity{bob.pgpkey, john.pgpkey}, maria.pgpkey, nil, nil)
+	util.Check(err)
+	w.Write([]byte("mymsg"))
+	w.Close()
+
+	buf2 := new(bytes.Buffer)
+	a, err := armor.Encode(buf2, openpgp.PrivateKeyType, nil)
+	util.Check(err)
+	john.pgpkey.SerializePrivate(a, nil)
+	maria.pgpkey.Serialize(a)
+	a.Close()
+	krs := buf2.String()
+
+	ring, err := openpgp.ReadArmoredKeyRing(strings.NewReader(krs))
+	util.Check(err)
+	m, err := openpgp.ReadMessage(buf, ring, nil, nil)
+	util.Check(err)
+	fmt.Printf("x: %#v\n", m)
+
+	fmt.Printf("IsEncrypted: %t\n", m.IsEncrypted)
+	fmt.Printf("IsSigned: %t\n", m.IsSigned)
+	fmt.Printf("IsSymmetricallyEncrypted: %t\n", m.IsSymmetricallyEncrypted)
+
+	data, err := ioutil.ReadAll(m.UnverifiedBody)
+	util.Check(err)
+	fmt.Printf("SignedByKeyId: %s\n", string(data))
+	fmt.Printf("SignatureError: %v\n", m.SignatureError)
+	fmt.Printf("Signature: %v\n", m.Signature)
 
 }
