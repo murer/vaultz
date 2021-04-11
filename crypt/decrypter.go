@@ -41,5 +41,5 @@ func DecryptBytes(cipher string, ring *KeyRing) []byte {
 }
 
 func DecryptString(cipher string, ring *KeyRing) string {
-	return string(EncryptBytes([]byte(cipher), ring))
+	return string(DecryptBytes(cipher, ring))
 }
