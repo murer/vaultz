@@ -44,12 +44,7 @@ func (me *Decrypter) UnsafeDecryptString() string {
 }
 
 func (me *Decrypter) Decrypt() io.Reader {
-	ar, err := armor.Decode(me.plain)
-	util.Check(err)
-	msg, err := openpgp.ReadMessage(ar.Body, me.ring.toPgpEntityList(), nil, nil)
-	util.Check(err)
-	me.msg = msg
-	return me.msg.UnverifiedBody
+	return me.UnsafeDecrypt()
 }
 
 func (me *Decrypter) DecryptBytes() []byte {
