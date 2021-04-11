@@ -51,6 +51,9 @@ func TestCrypt(t *testing.T) {
 	john := KeyGenerate("john", "john@sample.com")
 	fmt.Printf("john: %s\n", john.Id())
 
+	fmt.Println(maria.ExportPub())
+	fmt.Println(bob.ExportPriv())
+
 	ring := KeyRingCreate(maria, bob)
 	ring.Add(john)
 
