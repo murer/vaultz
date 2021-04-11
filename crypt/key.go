@@ -52,6 +52,6 @@ func (me *KeyPair) Import(encodedKey string) *KeyPair {
 	return me
 }
 
-func (me *KeyPair) KeyId() string {
+func (me *KeyPair) Id() string {
 	return me.pgpkey.PrimaryKey.KeyIdString()
 }
