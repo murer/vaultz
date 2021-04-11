@@ -61,21 +61,7 @@ func TestCrypt(t *testing.T) {
 	w.Write([]byte("mymsg"))
 	w.Close()
 
-	// buf2 := new(bytes.Buffer)
-	// a, err := armor.Encode(buf2, openpgp.PrivateKeyType, nil)
-	// util.Check(err)
-	// john.pgpkey.SerializePrivate(a, nil)
-	// maria.pgpkey.Serialize(a)
-	// a.Close()
-	// krs := buf2.String()
-
-	// ring, err := openpgp.ReadArmoredKeyRing(strings.NewReader(krs))
-	// util.Check(err)
-
-	var entityList openpgp.EntityList
-	entityList = append(entityList, maria.pgpkey, bob.pgpkey)
-
-	m, err := openpgp.ReadMessage(buf, entityList, nil, nil)
+	m, err := openpgp.ReadMessage(buf, ring.toPgpEntityList(), nil, nil)
 	util.Check(err)
 	fmt.Printf("x: %#v\n", m)
 
