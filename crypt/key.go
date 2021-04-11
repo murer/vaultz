@@ -10,16 +10,21 @@ import (
 	"golang.org/x/crypto/openpgp"
 )
 
-type KeyPair struct {
-	pgpkey *openpgp.Entity
-}
-
-func (me *KeyPair) Generate(name string, email string) *KeyPair {
+func KeyGenerate(name string, email string) *KeyPair {
 	var pgpkey *openpgp.Entity
 	pgpkey, err := openpgp.NewEntity(name, name, email, nil)
 	util.Check(err)
-	me.pgpkey = pgpkey
-	return me
+	return &KeyPair{pgpkey: pgpkey}
+}
+
+func KeyImport(encodedKey string) *KeyPair {
+	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
+	util.Check(err)
+	return &KeyPair{pgpkey: lst[0]}
+}
+
+type KeyPair struct {
+	pgpkey *openpgp.Entity
 }
 
 func (me *KeyPair) ExportPub() string {
@@ -43,13 +48,6 @@ func (me *KeyPair) ExportPriv() string {
 	me.pgpkey.SerializePrivate(a, nil)
 	a.Close()
 	return buf.String()
-}
-
-func (me *KeyPair) Import(encodedKey string) *KeyPair {
-	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
-	util.Check(err)
-	me.pgpkey = lst[0]
-	return me
 }
 
 func (me *KeyPair) Id() string {
