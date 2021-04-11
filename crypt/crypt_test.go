@@ -84,6 +84,9 @@ func TestCrypt(t *testing.T) {
 	util.Check(err)
 	fmt.Printf("SignedByKeyId: %s\n", string(data))
 	fmt.Printf("SignatureError: %v\n", m.SignatureError)
-	fmt.Printf("Signature: %v\n", m.Signature)
+	fmt.Printf("Signature: %#v\n", m.Signature)
+
+	fmt.Printf("SignedBy: %#v\n", m.SignedBy)
+	assert.Equal(t, maria.pgpkey.PrimaryKey.Fingerprint, m.SignedBy.Entity.PrimaryKey.Fingerprint)
 
 }
