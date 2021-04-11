@@ -3,9 +3,6 @@ package crypt
 import (
 	"bytes"
 	"io/ioutil"
-	"strings"
-
-	"golang.org/x/crypto/openpgp/armor"
 
 	"fmt"
 	"testing"
@@ -61,17 +58,21 @@ func TestCrypt(t *testing.T) {
 	w.Write([]byte("mymsg"))
 	w.Close()
 
-	buf2 := new(bytes.Buffer)
-	a, err := armor.Encode(buf2, openpgp.PrivateKeyType, nil)
-	util.Check(err)
-	john.pgpkey.SerializePrivate(a, nil)
-	maria.pgpkey.Serialize(a)
-	a.Close()
-	krs := buf2.String()
+	// buf2 := new(bytes.Buffer)
+	// a, err := armor.Encode(buf2, openpgp.PrivateKeyType, nil)
+	// util.Check(err)
+	// john.pgpkey.SerializePrivate(a, nil)
+	// maria.pgpkey.Serialize(a)
+	// a.Close()
+	// krs := buf2.String()
 
-	ring, err := openpgp.ReadArmoredKeyRing(strings.NewReader(krs))
-	util.Check(err)
-	m, err := openpgp.ReadMessage(buf, ring, nil, nil)
+	// ring, err := openpgp.ReadArmoredKeyRing(strings.NewReader(krs))
+	// util.Check(err)
+
+	var entityList openpgp.EntityList
+	entityList = append(entityList, bob.pgpkey)
+
+	m, err := openpgp.ReadMessage(buf, entityList, nil, nil)
 	util.Check(err)
 	fmt.Printf("x: %#v\n", m)
 
