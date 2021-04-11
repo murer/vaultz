@@ -2,7 +2,6 @@ package crypt
 
 import (
 	"bytes"
-	"encoding/hex"
 	"strings"
 
 	"github.com/murer/vaultz/crypt/util"
@@ -63,12 +62,6 @@ func (me *KeyPair) Import(encodedKey string) *KeyPair {
 	return me
 }
 
-func (me *KeyPair) PubFingerprint() string {
-	var bar []byte = me.pgpkey.PrimaryKey.Fingerprint[:]
-	return hex.EncodeToString(bar)
-}
-
-func (me *KeyPair) PrivFingerprint() string {
-	var bar []byte = me.pgpkey.PrivateKey.Fingerprint[:]
-	return hex.EncodeToString(bar)
+func (me *KeyPair) KeyId() string {
+	return me.pgpkey.PrimaryKey.KeyIdString()
 }
