@@ -36,11 +36,15 @@ func Encrypt(w io.Writer, ring *KeyRing) io.WriteCloser {
 	return &encrypter{armor: wa, writer: ew}
 }
 
-func EncryptString(plain string, ring *KeyRing) string {
+func EncryptBytes(plain []byte, ring *KeyRing) string {
 	buf := new(bytes.Buffer)
 	w := Encrypt(buf, ring)
 	defer w.Close()
-	w.Write([]byte(plain))
+	w.Write(plain)
 	util.Check(w.Close())
 	return buf.String()
+}
+
+func EncryptString(plain string, ring *KeyRing) string {
+	return EncryptBytes([]byte(plain), ring)
 }
