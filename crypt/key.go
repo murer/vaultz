@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/murer/vaultz/crypt/util"
+	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp/armor"
 
 	"golang.org/x/crypto/openpgp"

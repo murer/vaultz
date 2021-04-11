@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/murer/vaultz/crypt/util"
+	"github.com/murer/vaultz/util"
 
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/openpgp"
