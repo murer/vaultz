@@ -2,6 +2,7 @@ package crypt
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,7 +54,12 @@ func TestCrypt(t *testing.T) {
 	ciphered := EncryptString("mymsg", ring)
 	fmt.Println(ciphered)
 
-	plain := DecryptString(ciphered, ring)
+	decrypter := DecrypterCreate(strings.NewReader(ciphered), ring)
+	unsafePlain := decrypter.UnsafeDecryptString()
+	assert.Equal(t, "mymsg", unsafePlain)
+
+	decrypter = DecrypterCreate(strings.NewReader(ciphered), ring)
+	plain := decrypter.DecryptString()
 	assert.Equal(t, "mymsg", plain)
 
 	// buf := new(bytes.Buffer)

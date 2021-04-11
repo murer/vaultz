@@ -3,43 +3,62 @@ package crypt
 import (
 	"io"
 	"io/ioutil"
-	"strings"
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-type decrypter struct {
-	io.ReadCloser
-	reader io.Reader
+func DecrypterCreate(plain io.Reader, ring *KeyRing) *Decrypter {
+	return &Decrypter{plain: plain, ring: ring}
 }
 
-func (me *decrypter) Read(p []byte) (n int, err error) {
-	return me.reader.Read(p)
+type Decrypter struct {
+	// io.ReadCloser
+	// reader io.Reader
+
+	plain io.Reader
+	ring  *KeyRing
+
+	msg *openpgp.MessageDetails
 }
 
-func (me *decrypter) Close() error {
-	return nil
-}
-
-func Decrypt(r io.Reader, ring *KeyRing) io.ReadCloser {
-	ar, err := armor.Decode(r)
+func (me *Decrypter) UnsafeDecrypt() io.Reader {
+	ar, err := armor.Decode(me.plain)
 	util.Check(err)
-	in, err := openpgp.ReadMessage(ar.Body, ring.toPgpEntityList(), nil, nil)
+	msg, err := openpgp.ReadMessage(ar.Body, me.ring.toPgpEntityList(), nil, nil)
 	util.Check(err)
-	return &decrypter{reader: in.UnverifiedBody}
+	me.msg = msg
+	return me.msg.UnverifiedBody
 }
 
-func DecryptBytes(cipher string, ring *KeyRing) []byte {
-	r := Decrypt(strings.NewReader(cipher), ring)
-	defer r.Close()
+func (me *Decrypter) UnsafeDecryptBytes() []byte {
+	r := me.UnsafeDecrypt()
 	ret, err := ioutil.ReadAll(r)
 	util.Check(err)
-	util.Check(r.Close())
 	return ret
 }
 
-func DecryptString(cipher string, ring *KeyRing) string {
-	return string(DecryptBytes(cipher, ring))
+func (me *Decrypter) UnsafeDecryptString() string {
+	return string(me.UnsafeDecryptBytes())
+}
+
+func (me *Decrypter) Decrypt() io.Reader {
+	ar, err := armor.Decode(me.plain)
+	util.Check(err)
+	msg, err := openpgp.ReadMessage(ar.Body, me.ring.toPgpEntityList(), nil, nil)
+	util.Check(err)
+	me.msg = msg
+	return me.msg.UnverifiedBody
+}
+
+func (me *Decrypter) DecryptBytes() []byte {
+	r := me.Decrypt()
+	ret, err := ioutil.ReadAll(r)
+	util.Check(err)
+	return ret
+}
+
+func (me *Decrypter) DecryptString() string {
+	return string(me.DecryptBytes())
 }
