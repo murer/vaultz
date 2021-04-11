@@ -1,6 +1,7 @@
 package crypt
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -32,6 +33,10 @@ func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(ar.Body, me.ring.toPgpEntityList(), nil, nil)
 	util.Check(err)
 	me.msg = msg
+	log.Printf("Decrypt with id: %s", me.msg.DecryptedWith.Entity.PrimaryKey.KeyIdString())
+	for k, _ := range me.msg.DecryptedWith.Entity.Identities {
+		log.Printf("Decrypt with info: %s", k)
+	}
 	return me.msg.UnverifiedBody
 }
 
@@ -47,6 +52,7 @@ func (me *Decrypter) UnsafeDecryptString() string {
 }
 
 func (me *Decrypter) decryptToTemp() {
+	// TODO: must be encrypted
 	unsafe := me.UnsafeDecrypt()
 	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)
@@ -59,6 +65,14 @@ func (me *Decrypter) decryptToTemp() {
 
 func (me *Decrypter) Decrypt() io.ReadCloser {
 	me.decryptToTemp()
+	if me.msg.Signature == nil {
+		msg := fmt.Sprintf("bad sign: %X", me.msg.SignedByKeyId)
+		log.Fatal(msg)
+	}
+	log.Printf("Signed by id: %s", me.msg.SignedBy.Entity.PrimaryKey.KeyIdString())
+	for k, _ := range me.msg.SignedBy.Entity.Identities {
+		log.Printf("Signed by info: %s", k)
+	}
 	ret, err := os.Open(me.tempFile)
 	util.Check(err)
 	return ret

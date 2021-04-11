@@ -48,12 +48,12 @@ func TestCrypt(t *testing.T) {
 	fmt.Println(maria.ExportPub())
 	fmt.Println(bob.ExportPriv())
 
-	ring := KeyRingCreate(maria, bob)
-	ring.Add(john)
+	ring := KeyRingCreate(maria, bob, john)
 
 	ciphered := EncryptString("mymsg", ring)
 	fmt.Println(ciphered)
 
+	ring = KeyRingCreate(maria.PubOnly(), john)
 	decrypter := DecrypterCreate(strings.NewReader(ciphered), ring)
 	unsafePlain := decrypter.UnsafeDecryptString()
 	assert.Equal(t, "mymsg", unsafePlain)

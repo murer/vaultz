@@ -74,3 +74,7 @@ func (me *KeyPair) UserEmail() string {
 	}
 	return ""
 }
+
+func (me *KeyPair) PubOnly() *KeyPair {
+	return KeyImport(me.ExportPub())
+}
