@@ -70,7 +70,7 @@ func TestCrypt(t *testing.T) {
 	// util.Check(err)
 
 	var entityList openpgp.EntityList
-	entityList = append(entityList, bob.pgpkey)
+	entityList = append(entityList, maria.pgpkey, bob.pgpkey)
 
 	m, err := openpgp.ReadMessage(buf, entityList, nil, nil)
 	util.Check(err)
