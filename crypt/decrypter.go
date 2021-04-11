@@ -23,7 +23,7 @@ type Decrypter struct {
 	ring  *KeyRing
 
 	msg      *openpgp.MessageDetails
-	tempFile *os.File
+	tempFile string
 }
 
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
@@ -48,17 +48,20 @@ func (me *Decrypter) UnsafeDecryptString() string {
 
 func (me *Decrypter) decryptToTemp() {
 	unsafe := me.UnsafeDecrypt()
-	f, err := ioutil.TempFile("vaultz.tmp", "vaultz-decrypt-*.tmp")
+	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)
 	defer f.Close()
 	total, err := io.Copy(f, unsafe)
+	util.Check(err)
 	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
-	me.tempFile = f
+	me.tempFile = f.Name()
 }
 
 func (me *Decrypter) Decrypt() io.Reader {
 	me.decryptToTemp()
-	return nil
+	ret, err := os.Open(me.tempFile)
+	util.Check(err)
+	return ret
 }
 
 func (me *Decrypter) DecryptBytes() []byte {
