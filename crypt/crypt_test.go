@@ -50,10 +50,13 @@ func TestCrypt(t *testing.T) {
 	john := KeyGenerate("john", "john@sample.com")
 	fmt.Printf("john: %s\n", john.Id())
 
+	ring := KeyRingCreate(maria, bob)
+	ring.Add(john)
+
 	buf := new(bytes.Buffer)
 	// buf, err := os.Create("/tmp/x.txt.pgp")
 	// util.Check(err)
-	w, err := openpgp.Encrypt(buf, []*openpgp.Entity{bob.pgpkey, john.pgpkey}, maria.pgpkey, nil, nil)
+	w, err := openpgp.Encrypt(buf, ring.toPgpEntityList(), maria.pgpkey, nil, nil)
 	util.Check(err)
 	w.Write([]byte("mymsg"))
 	w.Close()
