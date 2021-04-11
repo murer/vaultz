@@ -2,17 +2,24 @@ package crypt
 
 import (
 	"bytes"
+	"crypto"
 	"strings"
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp/armor"
+	"golang.org/x/crypto/openpgp/packet"
 
 	"golang.org/x/crypto/openpgp"
 )
 
 func KeyGenerate(name string, email string) *KeyPair {
-
-	pgpkey, err := openpgp.NewEntity(name, name, email, nil)
+	config := &packet.Config{
+		DefaultHash:            crypto.SHA256,
+		DefaultCipher:          packet.CipherAES256,
+		DefaultCompressionAlgo: packet.CompressionZLIB,
+		RSABits:                4096,
+	}
+	pgpkey, err := openpgp.NewEntity(name, name, email, config)
 	util.Check(err)
 	return &KeyPair{pgpkey: pgpkey}
 }
