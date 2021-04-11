@@ -53,6 +53,9 @@ func TestCrypt(t *testing.T) {
 	ciphered := EncryptString("mymsg", ring)
 	fmt.Println(ciphered)
 
+	plain := DecryptString(ciphered, ring)
+	assert.Equal(t, "mymsg", plain)
+
 	// buf := new(bytes.Buffer)
 	// w, err := openpgp.Encrypt(buf, ring.toPgpEntityList(), maria.pgpkey, nil, nil)
 	// util.Check(err)
