@@ -3,6 +3,7 @@ package crypt
 import (
 	"bytes"
 	"io/ioutil"
+	"os"
 
 	"fmt"
 	"testing"
@@ -54,12 +55,15 @@ func TestCrypt(t *testing.T) {
 	ring.Add(john)
 
 	buf := new(bytes.Buffer)
-	// buf, err := os.Create("/tmp/x.txt.pgp")
-	// util.Check(err)
 	w, err := openpgp.Encrypt(buf, ring.toPgpEntityList(), maria.pgpkey, nil, nil)
 	util.Check(err)
 	w.Write([]byte("mymsg"))
 	w.Close()
+
+	fbuf, err := os.Create("/tmp/x.txt.pgp")
+	util.Check(err)
+	fbuf.Write(buf.Bytes())
+	fbuf.Close()
 
 	m, err := openpgp.ReadMessage(buf, ring.toPgpEntityList(), nil, nil)
 	util.Check(err)
