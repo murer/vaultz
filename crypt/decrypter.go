@@ -3,6 +3,8 @@ package crypt
 import (
 	"io"
 	"io/ioutil"
+	"log"
+	"os"
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
@@ -20,7 +22,8 @@ type Decrypter struct {
 	plain io.Reader
 	ring  *KeyRing
 
-	msg *openpgp.MessageDetails
+	msg      *openpgp.MessageDetails
+	tempFile *os.File
 }
 
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
@@ -43,8 +46,19 @@ func (me *Decrypter) UnsafeDecryptString() string {
 	return string(me.UnsafeDecryptBytes())
 }
 
+func (me *Decrypter) decryptToTemp() {
+	unsafe := me.UnsafeDecrypt()
+	f, err := ioutil.TempFile("vaultz.tmp", "vaultz-decrypt-*.tmp")
+	util.Check(err)
+	defer f.Close()
+	total, err := io.Copy(f, unsafe)
+	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
+	me.tempFile = f
+}
+
 func (me *Decrypter) Decrypt() io.Reader {
-	return me.UnsafeDecrypt()
+	me.decryptToTemp()
+	return nil
 }
 
 func (me *Decrypter) DecryptBytes() []byte {
