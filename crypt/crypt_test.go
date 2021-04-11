@@ -12,6 +12,8 @@ func TestKeyGen(t *testing.T) {
 
 	kp := &KeyPair{}
 	kp.Generate("test", "test@sample.com")
+	assert.Equal(t, "test", kp.UserName())
+	assert.Equal(t, "test@sample.com", kp.UserEmail())
 	assert.NotEmpty(t, kp.ExportPub())
 	assert.NotEmpty(t, kp.ExportPriv())
 	assert.NotEmpty(t, kp.Id())
@@ -19,6 +21,8 @@ func TestKeyGen(t *testing.T) {
 
 	pubkp := &KeyPair{}
 	pubkp.Import(kp.ExportPub())
+	assert.Equal(t, "test", pubkp.UserName())
+	assert.Equal(t, "test@sample.com", pubkp.UserEmail())
 	assert.Equal(t, kp.ExportPub(), pubkp.ExportPub())
 	assert.Empty(t, pubkp.ExportPriv())
 	assert.Equal(t, kp.Id(), pubkp.Id())
@@ -26,6 +30,8 @@ func TestKeyGen(t *testing.T) {
 
 	privkp := &KeyPair{}
 	privkp.Import(kp.ExportPriv())
+	assert.Equal(t, "test", privkp.UserName())
+	assert.Equal(t, "test@sample.com", privkp.UserEmail())
 	assert.Equal(t, kp.ExportPub(), privkp.ExportPub())
 	assert.NotEmpty(t, privkp.ExportPriv())
 	assert.Equal(t, kp.Id(), privkp.Id())

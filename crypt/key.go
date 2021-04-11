@@ -55,3 +55,17 @@ func (me *KeyPair) Import(encodedKey string) *KeyPair {
 func (me *KeyPair) Id() string {
 	return me.pgpkey.PrimaryKey.KeyIdString()
 }
+
+func (me *KeyPair) UserName() string {
+	for _, k := range me.pgpkey.Identities {
+		return k.UserId.Name
+	}
+	return ""
+}
+
+func (me *KeyPair) UserEmail() string {
+	for _, k := range me.pgpkey.Identities {
+		return k.UserId.Email
+	}
+	return ""
+}
