@@ -33,10 +33,8 @@ func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(ar.Body, me.ring.toPgpEntityList(), nil, nil)
 	util.Check(err)
 	me.msg = msg
-	log.Printf("Decrypt with id: %s", me.msg.DecryptedWith.Entity.PrimaryKey.KeyIdString())
-	for k, _ := range me.msg.DecryptedWith.Entity.Identities {
-		log.Printf("Decrypt with info: %s", k)
-	}
+	decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
+	log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
 	return me.msg.UnverifiedBody
 }
 
@@ -69,10 +67,8 @@ func (me *Decrypter) Decrypt() io.ReadCloser {
 		msg := fmt.Sprintf("bad sign: %X", me.msg.SignedByKeyId)
 		log.Fatal(msg)
 	}
-	log.Printf("Signed by id: %s", me.msg.SignedBy.Entity.PrimaryKey.KeyIdString())
-	for k, _ := range me.msg.SignedBy.Entity.Identities {
-		log.Printf("Signed by info: %s", k)
-	}
+	signerKP := keyFromEntity(me.msg.SignedBy.Entity)
+	log.Printf("Decrypt signed by id: %s %s", signerKP.Id(), signerKP.UserName())
 	ret, err := os.Open(me.tempFile)
 	util.Check(err)
 	return ret

@@ -35,6 +35,10 @@ func KeyImport(encodedKey string) *KeyPair {
 	return ret
 }
 
+func keyFromEntity(entity *openpgp.Entity) *KeyPair {
+	return &KeyPair{pgpkey: entity}
+}
+
 type KeyPair struct {
 	pgpkey *openpgp.Entity
 }
