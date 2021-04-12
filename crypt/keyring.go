@@ -33,10 +33,3 @@ func (me *KeyRing) toPgpEntityList() openpgp.EntityList {
 	}
 	return ret
 }
-
-func (me *KeyRing) first() *KeyPair {
-	for _, v := range me.kps {
-		return v
-	}
-	return nil
-}
