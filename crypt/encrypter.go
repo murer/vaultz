@@ -9,17 +9,40 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-type encrypterWriter struct {
+type Encrypter struct {
 	io.WriteCloser
+
+	ciphered   io.Writer
+	signer     *KeyPair
+	recipients *KeyRing
+
 	armor  io.WriteCloser
 	writer io.WriteCloser
 }
 
-func (me *encrypterWriter) Write(p []byte) (n int, err error) {
+func EncypterCreate(ciphered io.Writer, signer *KeyPair, recipients *KeyRing) *Encrypter {
+	return &Encrypter{
+		ciphered:   ciphered,
+		signer:     signer,
+		recipients: recipients,
+	}
+}
+
+func (me *Encrypter) Encrypt() io.WriteCloser {
+	wa, err := armor.Encode(me.ciphered, "PGP MESSAGE", nil)
+	util.Check(err)
+	ew, err := openpgp.Encrypt(wa, me.recipients.toPgpEntityList(), me.signer.pgpkey, nil, nil)
+	util.Check(err)
+	me.armor = wa
+	me.writer = ew
+	return me
+}
+
+func (me *Encrypter) Write(p []byte) (n int, err error) {
 	return me.writer.Write(p)
 }
 
-func (me *encrypterWriter) Close() error {
+func (me *Encrypter) Close() error {
 	we := me.writer.Close()
 	ae := me.armor.Close()
 	if we != nil {
@@ -28,17 +51,10 @@ func (me *encrypterWriter) Close() error {
 	return ae
 }
 
-func Encrypt(w io.Writer, signer *KeyPair, ring *KeyRing) io.WriteCloser {
-	wa, err := armor.Encode(w, "PGP MESSAGE", nil)
-	util.Check(err)
-	ew, err := openpgp.Encrypt(wa, ring.toPgpEntityList(), signer.pgpkey, nil, nil)
-	util.Check(err)
-	return &encrypterWriter{armor: wa, writer: ew}
-}
-
-func EncryptBytes(plain []byte, signer *KeyPair, ring *KeyRing) string {
+func EncryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) string {
 	buf := new(bytes.Buffer)
-	w := Encrypt(buf, signer, ring)
+	encrypter := EncypterCreate(buf, signer, recipients)
+	w := encrypter.Encrypt()
 	defer w.Close()
 	w.Write(plain)
 	util.Check(w.Close())
