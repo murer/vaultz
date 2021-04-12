@@ -2,6 +2,7 @@ package crypt
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,4 +21,11 @@ func TestSymKeyGen(t *testing.T) {
 	fmt.Println(ciphered2)
 
 	assert.NotEqual(t, ciphered1, ciphered2)
+
+	decrypter := SymDecrypterCreate(strings.NewReader(ciphered1), k1)
+	defer decrypter.Close()
+	assert.Equal(t, "mymsg", decrypter.DecryptString())
+	decrypter = SymDecrypterCreate(strings.NewReader(ciphered2), k1)
+	defer decrypter.Close()
+	assert.Equal(t, "mymsg", decrypter.DecryptString())
 }
