@@ -12,13 +12,14 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-func DecrypterCreate(plain io.Reader, writers *KeyRing) *Decrypter {
-	return &Decrypter{plain: plain, writers: writers}
+func DecrypterCreate(plain io.Reader, writers *KeyRing, readers *KeyRing) *Decrypter {
+	return &Decrypter{plain: plain, writers: writers, readers: readers}
 }
 
 type Decrypter struct {
 	plain   io.Reader
 	writers *KeyRing
+	readers *KeyRing
 
 	msg      *openpgp.MessageDetails
 	tempFile string
@@ -27,7 +28,8 @@ type Decrypter struct {
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	ar, err := armor.Decode(me.plain)
 	util.Check(err)
-	msg, err := openpgp.ReadMessage(ar.Body, me.writers.toPgpEntityList(), nil, nil)
+	keys := append(me.readers.toPgpEntityList(), me.writers.toPgpEntityList()...)
+	msg, err := openpgp.ReadMessage(ar.Body, keys, nil, nil)
 	util.Check(err)
 	me.msg = msg
 	decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
@@ -58,12 +60,24 @@ func (me *Decrypter) decryptToTemp() {
 	me.tempFile = f.Name()
 }
 
-func (me *Decrypter) Decrypt() io.ReadCloser {
-	me.decryptToTemp()
+func (me *Decrypter) decryptCheckSigner() {
 	if me.msg.Signature == nil {
-		msg := fmt.Sprintf("bad sign: %X", me.msg.SignedByKeyId)
+		msg := fmt.Sprintf("Decrypt unknown signer: %X", me.msg.SignedByKeyId)
 		log.Panic(msg)
 	}
+	sigKP := keyFromEntity(me.msg.SignedBy.Entity)
+	pubKey := sigKP.ExportPub()
+	for _, v := range me.writers.kps {
+		if v.ExportPub() == pubKey {
+			return
+		}
+	}
+	log.Panicf("Decrypt signer is not a writer: %s", sigKP.Id())
+}
+
+func (me *Decrypter) Decrypt() io.ReadCloser {
+	me.decryptToTemp()
+	me.decryptCheckSigner()
 	signerKP := keyFromEntity(me.msg.SignedBy.Entity)
 	log.Printf("Decrypt signed by id: %s %s", signerKP.Id(), signerKP.UserName())
 	ret, err := os.Open(me.tempFile)
