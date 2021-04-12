@@ -23,6 +23,7 @@ type Decrypter struct {
 	readers *KeyRing
 
 	msg      *openpgp.MessageDetails
+	tempKey  *SymKey
 	tempFile string
 }
 
@@ -63,7 +64,10 @@ func (me *Decrypter) decryptToTemp() {
 	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)
 	defer f.Close()
-	total, err := io.Copy(f, unsafe)
+	me.tempKey = SymKeyGenerate()
+	encrypter := SymEncypterCreate(f, me.tempKey)
+	defer encrypter.Close()
+	total, err := io.Copy(encrypter.Encrypt(), unsafe)
 	util.Check(err)
 	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
 	me.tempFile = f.Name()
@@ -89,9 +93,10 @@ func (me *Decrypter) Decrypt() io.ReadCloser {
 	me.decryptCheckSigner()
 	signerKP := keyFromEntity(me.msg.SignedBy.Entity)
 	log.Printf("Decrypt signed by id: %s %s", signerKP.Id(), signerKP.UserName())
-	ret, err := os.Open(me.tempFile)
+	f, err := os.Open(me.tempFile)
 	util.Check(err)
-	return ret
+	decrypter := SymDecrypterCreate(f, me.tempKey)
+	return decrypter.Decrypt()
 }
 
 func (me *Decrypter) DecryptBytes() []byte {

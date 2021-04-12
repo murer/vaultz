@@ -15,18 +15,22 @@ func SymDecrypterCreate(plain io.Reader, key *SymKey) *SymDecrypter {
 }
 
 type SymDecrypter struct {
-	io.Closer
+	io.ReadCloser
 	plain io.Reader
 	key   *SymKey
 
 	msg *openpgp.MessageDetails
 }
 
+func (me *SymDecrypter) Read(p []byte) (n int, err error) {
+	return me.msg.UnverifiedBody.Read(p)
+}
+
 func (me *SymDecrypter) Close() error {
 	return nil
 }
 
-func (me *SymDecrypter) Decrypt() io.Reader {
+func (me *SymDecrypter) Decrypt() io.ReadCloser {
 	ar, err := armor.Decode(me.plain)
 	util.Check(err)
 	msg, err := openpgp.ReadMessage(ar.Body, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
@@ -35,7 +39,7 @@ func (me *SymDecrypter) Decrypt() io.Reader {
 	util.Check(err)
 	me.msg = msg
 	log.Printf("SymDecrypt with key size: %d", me.key.Size())
-	return me.msg.UnverifiedBody
+	return me
 }
 
 func (me *SymDecrypter) DecryptBytes() []byte {

@@ -2,6 +2,7 @@ package crypt
 
 import (
 	"bytes"
+	"crypto/rand"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -11,7 +12,14 @@ import (
 )
 
 func SymKeyGenerate() *SymKey {
-	ret := &SymKey{key: []byte("test")}
+	size := 32
+	b := make([]byte, size)
+	s, err := rand.Read(b)
+	util.Check(err)
+	if s != size {
+		log.Panicf("it must be %d, but was %d", size, s)
+	}
+	ret := &SymKey{key: b}
 	log.Printf("SymKeyGenerate, size: %d", ret.Size())
 	return ret
 }
