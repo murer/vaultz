@@ -28,7 +28,7 @@ func (me *encrypter) Close() error {
 	return ae
 }
 
-func Encrypt(w io.Writer, ring *KeyRing) io.WriteCloser {
+func Encrypt(w io.Writer, signer *KeyPair, ring *KeyRing) io.WriteCloser {
 	wa, err := armor.Encode(w, "PGP MESSAGE", nil)
 	util.Check(err)
 	ew, err := openpgp.Encrypt(wa, ring.toPgpEntityList(), ring.first().pgpkey, nil, nil)
@@ -36,15 +36,15 @@ func Encrypt(w io.Writer, ring *KeyRing) io.WriteCloser {
 	return &encrypter{armor: wa, writer: ew}
 }
 
-func EncryptBytes(plain []byte, ring *KeyRing) string {
+func EncryptBytes(plain []byte, signer *KeyPair, ring *KeyRing) string {
 	buf := new(bytes.Buffer)
-	w := Encrypt(buf, ring)
+	w := Encrypt(buf, signer, ring)
 	defer w.Close()
 	w.Write(plain)
 	util.Check(w.Close())
 	return buf.String()
 }
 
-func EncryptString(plain string, ring *KeyRing) string {
-	return EncryptBytes([]byte(plain), ring)
+func EncryptString(plain string, signer *KeyPair, ring *KeyRing) string {
+	return EncryptBytes([]byte(plain), signer, ring)
 }

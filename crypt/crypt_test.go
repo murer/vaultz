@@ -50,7 +50,7 @@ func TestCrypt(t *testing.T) {
 
 	ring := KeyRingCreate(maria, bob, john)
 
-	ciphered := EncryptString("mymsg", ring)
+	ciphered := EncryptString("mymsg", maria, ring)
 	fmt.Println(ciphered)
 
 	ring = KeyRingCreate(maria.PubOnly(), john)
