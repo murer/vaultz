@@ -37,54 +37,19 @@ func TestKeyGen(t *testing.T) {
 }
 
 func TestCrypt(t *testing.T) {
-
 	maria := KeyGenerate("maria", "maria@sample.com")
 	bob := KeyGenerate("bob", "bob@sample.com")
 	john := KeyGenerate("john", "john@sample.com")
-
 	// fmt.Println(maria.ExportPub())
 	// fmt.Println(bob.ExportPriv())
-
 	ring := KeyRingCreate(maria, bob, john)
-
 	ciphered := EncryptString("mymsg", maria, ring)
 	// fmt.Println(ciphered)
-
 	ring = KeyRingCreate(maria.PubOnly(), john)
 	decrypter := DecrypterCreate(strings.NewReader(ciphered), ring)
 	unsafePlain := decrypter.UnsafeDecryptString()
 	assert.Equal(t, "mymsg", unsafePlain)
-
 	decrypter = DecrypterCreate(strings.NewReader(ciphered), ring)
 	plain := decrypter.DecryptString()
 	assert.Equal(t, "mymsg", plain)
-
-	// buf := new(bytes.Buffer)
-	// w, err := openpgp.Encrypt(buf, ring.toPgpEntityList(), maria.pgpkey, nil, nil)
-	// util.Check(err)
-	// w.Write([]byte("mymsg"))
-	// w.Close()
-
-	// fbuf, err := os.Create("/tmp/x.txt.pgp")
-	// util.Check(err)
-	// fbuf.Write(buf.Bytes())
-	// fbuf.Close()
-
-	// m, err := openpgp.ReadMessage(buf, ring.toPgpEntityList(), nil, nil)
-	// util.Check(err)
-	// fmt.Printf("x: %#v\n", m)
-
-	// fmt.Printf("IsEncrypted: %t\n", m.IsEncrypted)
-	// fmt.Printf("IsSigned: %t\n", m.IsSigned)
-	// fmt.Printf("IsSymmetricallyEncrypted: %t\n", m.IsSymmetricallyEncrypted)
-
-	// data, err := ioutil.ReadAll(m.UnverifiedBody)
-	// util.Check(err)
-	// fmt.Printf("SignedByKeyId: %s\n", string(data))
-	// fmt.Printf("SignatureError: %v\n", m.SignatureError)
-	// fmt.Printf("Signature: %#v\n", m.Signature)
-
-	// fmt.Printf("SignedBy: %#v\n", m.SignedBy)
-	// assert.Equal(t, maria.pgpkey.PrimaryKey.Fingerprint, m.SignedBy.Entity.PrimaryKey.Fingerprint)
-
 }
