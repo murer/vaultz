@@ -38,7 +38,7 @@ func (me *Encrypter) Encrypt() io.WriteCloser {
 	util.Check(err)
 	me.armor = wa
 	me.writer = ew
-	log.Printf("Encrypt start, signer: %s %s", me.signer.Id(), me.signer.UserName())
+	log.Printf("Encrypt start, signer: %s %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
 	for _, v := range me.recipients.kps {
 		log.Printf("Encrypt start, recipients: %s %s", v.Id(), v.UserName())
 	}
