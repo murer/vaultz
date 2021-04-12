@@ -1,4 +1,4 @@
-package crypt
+package pgp
 
 import "golang.org/x/crypto/openpgp"
 

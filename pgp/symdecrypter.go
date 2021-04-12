@@ -1,4 +1,4 @@
-package crypt
+package pgp
 
 import (
 	"io"
