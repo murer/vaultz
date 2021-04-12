@@ -45,13 +45,13 @@ func TestCrypt(t *testing.T) {
 	john := KeyGenerate("john", "john@sample.com")
 	fmt.Printf("john: %s\n", john.Id())
 
-	fmt.Println(maria.ExportPub())
-	fmt.Println(bob.ExportPriv())
+	// fmt.Println(maria.ExportPub())
+	// fmt.Println(bob.ExportPriv())
 
 	ring := KeyRingCreate(maria, bob, john)
 
 	ciphered := EncryptString("mymsg", maria, ring)
-	fmt.Println(ciphered)
+	// fmt.Println(ciphered)
 
 	ring = KeyRingCreate(maria.PubOnly(), john)
 	decrypter := DecrypterCreate(strings.NewReader(ciphered), ring)

@@ -3,6 +3,7 @@ package crypt
 import (
 	"bytes"
 	"crypto"
+	"log"
 	"strings"
 
 	"github.com/murer/vaultz/util"
@@ -21,13 +22,17 @@ func KeyGenerate(name string, email string) *KeyPair {
 	}
 	pgpkey, err := openpgp.NewEntity(name, name, email, config)
 	util.Check(err)
-	return &KeyPair{pgpkey: pgpkey}
+	ret := &KeyPair{pgpkey: pgpkey}
+	log.Printf("KeyGenerate: %s", ret.Id())
+	return ret
 }
 
 func KeyImport(encodedKey string) *KeyPair {
 	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
 	util.Check(err)
-	return &KeyPair{pgpkey: lst[0]}
+	ret := &KeyPair{pgpkey: lst[0]}
+	log.Printf("KeyImport: %s", ret.Id())
+	return ret
 }
 
 type KeyPair struct {
