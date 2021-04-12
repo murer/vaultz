@@ -26,10 +26,6 @@ func SymKeyImport(encodedKey string) *SymKey {
 	return ret
 }
 
-// func keyFromBytes(key []byte) *SymKey {
-// 	return &SymKey{key: key}
-// }
-
 type SymKey struct {
 	key []byte
 }
