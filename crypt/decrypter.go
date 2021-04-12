@@ -17,12 +17,21 @@ func DecrypterCreate(plain io.Reader, writers *KeyRing, readers *KeyRing) *Decry
 }
 
 type Decrypter struct {
+	io.Closer
 	plain   io.Reader
 	writers *KeyRing
 	readers *KeyRing
 
 	msg      *openpgp.MessageDetails
 	tempFile string
+}
+
+func (me *Decrypter) Close() error {
+	if me.tempFile != "" {
+		log.Printf("Decrypter closing, delete: %s", me.tempFile)
+		os.Remove(me.tempFile)
+	}
+	return nil
 }
 
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
