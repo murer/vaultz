@@ -36,6 +36,30 @@ func TestKeyGen(t *testing.T) {
 	fmt.Printf("id: %s\n", privkp.Id())
 }
 
+func TestCryptWrongDecrypt(t *testing.T) {
+	maria := KeyGenerate("maria", "maria@sample.com")
+	bob := KeyGenerate("bob", "bob@sample.com")
+	ring := KeyRingCreate(bob)
+	ciphered := EncryptString("mymsg", maria, ring)
+	ring = KeyRingCreate(maria.PubOnly())
+	decrypter := DecrypterCreate(strings.NewReader(ciphered), ring)
+	assert.Panics(t, func() {
+		decrypter.DecryptString()
+	})
+}
+
+func TestCryptWrongSign(t *testing.T) {
+	maria := KeyGenerate("maria", "maria@sample.com")
+	bob := KeyGenerate("bob", "bob@sample.com")
+	ring := KeyRingCreate(bob)
+	ciphered := EncryptString("mymsg", maria, ring)
+	ring = KeyRingCreate(bob)
+	decrypter := DecrypterCreate(strings.NewReader(ciphered), ring)
+	assert.Panics(t, func() {
+		decrypter.DecryptString()
+	})
+}
+
 func TestCrypt(t *testing.T) {
 	maria := KeyGenerate("maria", "maria@sample.com")
 	bob := KeyGenerate("bob", "bob@sample.com")

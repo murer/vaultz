@@ -65,7 +65,7 @@ func (me *Decrypter) Decrypt() io.ReadCloser {
 	me.decryptToTemp()
 	if me.msg.Signature == nil {
 		msg := fmt.Sprintf("bad sign: %X", me.msg.SignedByKeyId)
-		log.Fatal(msg)
+		log.Panic(msg)
 	}
 	signerKP := keyFromEntity(me.msg.SignedBy.Entity)
 	log.Printf("Decrypt signed by id: %s %s", signerKP.Id(), signerKP.UserName())
