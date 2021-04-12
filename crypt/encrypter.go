@@ -31,7 +31,7 @@ func (me *encrypter) Close() error {
 func Encrypt(w io.Writer, signer *KeyPair, ring *KeyRing) io.WriteCloser {
 	wa, err := armor.Encode(w, "PGP MESSAGE", nil)
 	util.Check(err)
-	ew, err := openpgp.Encrypt(wa, ring.toPgpEntityList(), ring.first().pgpkey, nil, nil)
+	ew, err := openpgp.Encrypt(wa, ring.toPgpEntityList(), signer.pgpkey, nil, nil)
 	util.Check(err)
 	return &encrypter{armor: wa, writer: ew}
 }
