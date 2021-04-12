@@ -12,16 +12,13 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-func DecrypterCreate(plain io.Reader, ring *KeyRing) *Decrypter {
-	return &Decrypter{plain: plain, ring: ring}
+func DecrypterCreate(plain io.Reader, writers *KeyRing) *Decrypter {
+	return &Decrypter{plain: plain, writers: writers}
 }
 
 type Decrypter struct {
-	// io.ReadCloser
-	// reader io.Reader
-
-	plain io.Reader
-	ring  *KeyRing
+	plain   io.Reader
+	writers *KeyRing
 
 	msg      *openpgp.MessageDetails
 	tempFile string
@@ -30,7 +27,7 @@ type Decrypter struct {
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	ar, err := armor.Decode(me.plain)
 	util.Check(err)
-	msg, err := openpgp.ReadMessage(ar.Body, me.ring.toPgpEntityList(), nil, nil)
+	msg, err := openpgp.ReadMessage(ar.Body, me.writers.toPgpEntityList(), nil, nil)
 	util.Check(err)
 	me.msg = msg
 	decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
