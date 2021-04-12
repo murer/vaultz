@@ -3,6 +3,7 @@ package crypt
 import (
 	"bytes"
 	"io"
+	"log"
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
@@ -35,6 +36,7 @@ func (me *Encrypter) Encrypt() io.WriteCloser {
 	util.Check(err)
 	me.armor = wa
 	me.writer = ew
+	log.Printf("Encrypt start, signer: %s %s", me.signer.Id(), me.signer.UserName())
 	return me
 }
 
