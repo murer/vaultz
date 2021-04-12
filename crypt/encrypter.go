@@ -19,6 +19,8 @@ type Encrypter struct {
 
 	armor  io.WriteCloser
 	writer io.WriteCloser
+
+	byteCount uint64
 }
 
 func EncypterCreate(ciphered io.Writer, signer *KeyPair, recipients *KeyRing) *Encrypter {
@@ -37,14 +39,19 @@ func (me *Encrypter) Encrypt() io.WriteCloser {
 	me.armor = wa
 	me.writer = ew
 	log.Printf("Encrypt start, signer: %s %s", me.signer.Id(), me.signer.UserName())
+	for _, v := range me.recipients.kps {
+		log.Printf("Encrypt start, recipients: %s %s", v.Id(), v.UserName())
+	}
 	return me
 }
 
 func (me *Encrypter) Write(p []byte) (n int, err error) {
+	me.byteCount = me.byteCount + uint64(len(p))
 	return me.writer.Write(p)
 }
 
 func (me *Encrypter) Close() error {
+	log.Printf("Encrypt done, size: %d", me.byteCount)
 	we := me.writer.Close()
 	ae := me.armor.Close()
 	if we != nil {
@@ -53,14 +60,17 @@ func (me *Encrypter) Close() error {
 	return ae
 }
 
-func EncryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) string {
+func _encryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) *bytes.Buffer {
 	buf := new(bytes.Buffer)
 	encrypter := EncypterCreate(buf, signer, recipients)
 	w := encrypter.Encrypt()
 	defer w.Close()
 	w.Write(plain)
-	util.Check(w.Close())
-	return buf.String()
+	return buf
+}
+
+func EncryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) string {
+	return _encryptBytes(plain, signer, recipients).String()
 }
 
 func EncryptString(plain string, signer *KeyPair, ring *KeyRing) string {
