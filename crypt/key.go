@@ -23,7 +23,7 @@ func KeyGenerate(name string, email string) *KeyPair {
 	pgpkey, err := openpgp.NewEntity(name, name, email, config)
 	util.Check(err)
 	ret := &KeyPair{pgpkey: pgpkey}
-	log.Printf("KeyGenerate: %s", ret.Id())
+	log.Printf("KeyGenerate: %s %s", ret.Id(), ret.UserName())
 	return ret
 }
 
@@ -31,7 +31,7 @@ func KeyImport(encodedKey string) *KeyPair {
 	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
 	util.Check(err)
 	ret := &KeyPair{pgpkey: lst[0]}
-	log.Printf("KeyImport: %s", ret.Id())
+	log.Printf("KeyImport: %s %s", ret.Id(), ret.UserName())
 	return ret
 }
 
