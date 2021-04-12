@@ -3,15 +3,26 @@ package crypt
 import "golang.org/x/crypto/openpgp"
 
 type KeyRing struct {
-	kps []*KeyPair
+	kps map[string]*KeyPair
 }
 
 func KeyRingCreate(kps ...*KeyPair) *KeyRing {
-	return &KeyRing{kps: kps}
+	ret := &KeyRing{
+		kps: make(map[string]*KeyPair),
+	}
+	ret.Add(kps...)
+	return ret
+}
+
+func (me *KeyRing) _add(kp *KeyPair) {
+	id := kp.Id()
+	me.kps[id] = kp
 }
 
 func (me *KeyRing) Add(kps ...*KeyPair) *KeyRing {
-	me.kps = append(me.kps, kps...)
+	for _, v := range kps {
+		me._add(v)
+	}
 	return me
 }
 
@@ -24,5 +35,8 @@ func (me *KeyRing) toPgpEntityList() openpgp.EntityList {
 }
 
 func (me *KeyRing) first() *KeyPair {
-	return me.kps[0]
+	for _, v := range me.kps {
+		return v
+	}
+	return nil
 }
