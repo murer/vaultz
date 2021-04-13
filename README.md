@@ -2,7 +2,8 @@
 
 
 ```
-.vaultz/dextra/self.keypair
+.vaultz/dextra/self.priv
+.vaultz/dextra/self.pub
 
 .vaultz/dextra/keyring/raoni.pubkey
 .vaultz/dextra/keyring/lucas.pubkey
@@ -24,6 +25,24 @@ vaultz dextra dec test.txt.vaultz -o test.txt
 
 vaultz dextra enc test.txt -r lucas alvaro ed raoni -l 3 -o test.txt.vaultz
 ed falha: vaultz dextra dec test.txt.vaultz -o test.txt
+
+murer: vaultz dextra enc  test.txt            -o test.txt.enc.vaultz       -r ed lucas alvaro raoni murer leo -l 3
+ed:    vaultz dextra req  test.txt.enc.vaultz -o ed.request.padlock.vaultz -r ed lucas alvaro raoni murer leo
+ed:    vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o ed.pin.padlock.vaultz
+raoni: vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o raoni.pin.padlock.vaultz
+murer: vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o murer.pin.padlock.vaultz
+ed:    vaultz dextra dec  test.txt.enc.vaultz -p ed.pin.padlock.vaultz raoni.pin.padlock.vaultz murer.pin.padlock.vaultz
+
+murer: vaultz dextra enc  test.txt            -o test.txt.enc.vaultz       -g dsa    -l 3
+ed:    vaultz dextra req  test.txt.enc.vaultz -o ed.request.padlock.vaultz -g dsa
+ed:    vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o ed.pin.padlock.vaultz    -r ed
+raoni: vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o raoni.pin.padlock.vaultz # confirm user interactive
+murer: vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o murer.pin.padlock.vaultz -r ed
+ed:    vaultz dextra dec  test.txt.enc.vaultz -p ed.pin.padlock.vaultz raoni.pin.padlock.vaultz murer.pin.padlock.vaultz
+ed:    vaultz dextra dec  test.txt.enc.vaultz -p                       raoni.pin.padlock.vaultz murer.pin.padlock.vaultz
+
+murer: vaultz dextra enc  test.txt            -o test.txt.enc.vaultz       -g dsa    # -l 1
+ed:    vaultz dextra dec  test.txt.enc.vaultz
 
 # raoni: vaultz dextra part test.txt.vaultz -r ed -o raoni.part
 # alvaro: vaultz dextra part test.txt.vaultz -r ed -o alvaro.part
