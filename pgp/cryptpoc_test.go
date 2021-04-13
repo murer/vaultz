@@ -3,7 +3,6 @@ package pgp
 import (
 	"bytes"
 	"io/ioutil"
-	"log"
 	"testing"
 
 	"github.com/murer/vaultz/util"
@@ -30,8 +29,6 @@ func TestPocSequential(t *testing.T) {
 		writer.Write([]byte("second"))
 	}()
 
-	log.Printf("%s\n", buf.String())
-
 	func() {
 		decrypter := DecrypterCreate(buf, KeyRingCreate(kp), KeyRingCreate())
 		defer decrypter.Close()
@@ -45,13 +42,13 @@ func TestPocSequential(t *testing.T) {
 	// util.Check(err)
 	// log.Printf("rest: %s", string(d))
 
-	func() {
-		decrypter := SymDecrypterCreate(buf, s)
-		defer decrypter.Close()
-		reader := decrypter.Decrypt()
-		data, err := ioutil.ReadAll(reader)
-		util.Check(err)
-		assert.Equal(t, "second", string(data))
-	}()
+	// func() {
+	// 	decrypter := SymDecrypterCreate(buf, s)
+	// 	defer decrypter.Close()
+	// 	reader := decrypter.Decrypt()
+	// 	data, err := ioutil.ReadAll(reader)
+	// 	util.Check(err)
+	// 	assert.Equal(t, "second", string(data))
+	// }()
 
 }

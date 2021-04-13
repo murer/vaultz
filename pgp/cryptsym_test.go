@@ -1,8 +1,6 @@
 package pgp
 
 import (
-	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -15,12 +13,9 @@ func TestSymKeyGen(t *testing.T) {
 	k1 := SymKeyGenerate()
 	k2 := SymKeyImport(k1.Export())
 	assert.Equal(t, k1.key, k2.key)
-	log.Printf("XXX %X", k1.key)
 
 	ciphered1 := SymEncryptString("mymsg", k1)
-	fmt.Println(ciphered1)
 	ciphered2 := SymEncryptString("mymsg", k1)
-	fmt.Println(ciphered2)
 
 	assert.NotEqual(t, ciphered1, ciphered2)
 
