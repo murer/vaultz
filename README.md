@@ -32,6 +32,10 @@ ed:    vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o ed.pin
 raoni: vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o raoni.pin.padlock.vaultz
 murer: vaultz dextra resp test.txt.enc.vaultz ed.request.unlock.vaultz -o murer.pin.padlock.vaultz
 ed:    vaultz dextra dec  test.txt.enc.vaultz -p ed.pin.padlock.vaultz raoni.pin.padlock.vaultz murer.pin.padlock.vaultz
+ed:    vaultz dextra dec  test.txt.enc.vaultz -p                       raoni.pin.padlock.vaultz murer.pin.padlock.vaultz
+
+murer: vaultz dextra enc  test.txt            -o test.txt.enc.vaultz       -r ed lucas alvaro raoni murer leo    # -l 1
+ed:    vaultz dextra dec  test.txt.enc.vaultz
 
 murer: vaultz dextra enc  test.txt            -o test.txt.enc.vaultz       -g dsa    -l 3
 ed:    vaultz dextra req  test.txt.enc.vaultz -o ed.request.padlock.vaultz -g dsa
