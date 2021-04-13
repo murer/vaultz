@@ -52,15 +52,33 @@ func (me *combinator) Next() []string {
 	return []string{}
 }
 
+func (me *combinator) Total() uint64 {
+	x := len(me.ids) - len(me.tuple)
+	ret := uint64(1)
+	for i := x + 1; i <= len(me.ids); i++ {
+		ret = ret * uint64(i)
+	}
+	y := uint64(1)
+	for i := 1; i <= len(me.tuple); i++ {
+		y = y * uint64(i)
+	}
+	return ret / y
+}
+
 func TestLockPoc(t *testing.T) {
 
 	comb := &combinator{
-		ids:        []string{"a", "b", "c", "d", "e"},
-		tuple:      make([]int, 3),
+		tuple:      make([]int, 2),
 		hasStarted: false,
 	}
-	for i := 0; i < 10; i++ {
-		fmt.Printf("x: %d = %v\n", i, comb.Next())
+	max := 40
+	comb.ids = make([]string, max)
+	for i := 0; i < max; i++ {
+		comb.ids[i] = fmt.Sprintf("%d", i)
+	}
+	fmt.Printf("total: %d\n", comb.Total())
+	for i := comb.Next(); len(i) > 0; i = comb.Next() {
+		fmt.Printf("x: %v\n", i)
 	}
 
 	assert.Fail(t, "a")
