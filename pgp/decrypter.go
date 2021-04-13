@@ -42,6 +42,9 @@ func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(ar.Body, keys, nil, nil)
 	util.Check(err)
 	me.msg = msg
+	if !me.msg.IsEncrypted {
+		log.Panicf("Decrypt, it is not encrypted")
+	}
 	decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
 	log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
 	return me.msg.UnverifiedBody
