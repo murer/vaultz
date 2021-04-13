@@ -41,13 +41,21 @@ ed:    vaultz dextra dec  test.txt.enc.vaultz -p                       raoni.pin
 
 murer: vaultz dextra enc  test.txt            -o test.txt.enc.vaultz       -g dsa    # -l 1
 ed:    vaultz dextra dec  test.txt.enc.vaultz -o test.txt
-```
 
-```
-a := generate AES256 key
-encrypt payload AES256 key
+vaultz dextra self gen -u murer
+vaultz dextra self export pub -o murer.pubkey.vaultz
+vaultz dextra self export priv -o murer.privkey.vaultz
 
-encrypt(a, b)
-encrypt(a, c)
-encrypt(a, d)
+vaultz dextra keyring import -i alvaro.pubkey.vaultz # confirm user interactive
+vaultz dextra keyring delete alvaro
+
+vaultz dextra padlock dsa create
+vaultz dextra padlock dsa delete
+vaultz dextra padlock dsa writer/read add/remove murer ed
+vaultz dextra padlock dsa writer/read list
+vaultz dextra padlock dsa export -o dsa.ids.padlock.vaultz # signed by murer
+vaultz dextra padlock dsa import -i dsa.ids.padlock.vaultz # confirm user interactive
+
+vaultz dextra export -o dextra.namespace.vaultz
+vaultz dextra import -i dextra.namespace.vaultz
 ```
