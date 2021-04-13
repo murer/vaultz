@@ -17,7 +17,10 @@ func KeyGenerate(name string, email string) *KeyPair {
 		DefaultHash:            crypto.SHA256,
 		DefaultCipher:          packet.CipherAES256,
 		DefaultCompressionAlgo: packet.CompressionZLIB,
-		RSABits:                1024,
+		CompressionConfig: &packet.CompressionConfig{
+			Level: packet.BestCompression,
+		},
+		RSABits: 1024,
 	}
 	pgpkey, err := openpgp.NewEntity(name, name, email, config)
 	util.Check(err)

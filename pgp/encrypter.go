@@ -33,14 +33,6 @@ func EncypterCreate(ciphered io.Writer, signer *KeyPair, recipients *KeyRing) *E
 func (me *Encrypter) Encrypt() io.WriteCloser {
 	// wa, err := armor.Encode(me.ciphered, "PGP MESSAGE", nil)
 	// util.Check(err)
-
-	// config := &packet.Config{
-	// 	DefaultHash:            crypto.SHA256,
-	// 	DefaultCipher:          packet.CipherAES256,
-	// 	DefaultCompressionAlgo: packet.CompressionZLIB,
-	// 	RSABits:                1024,
-	// }
-
 	ew, err := openpgp.Encrypt(me.ciphered, me.recipients.toPgpEntityList(), me.signer.pgpkey, nil, nil)
 	util.Check(err)
 	// me.armor = wa
