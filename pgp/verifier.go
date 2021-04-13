@@ -17,13 +17,7 @@ func VerifierCreate(plain io.Reader, writers *KeyRing) *Verifier {
 }
 
 type Verifier struct {
-	io.Closer
-	plain   io.Reader
-	writers *KeyRing
-
-	msg      *openpgp.MessageDetails
-	tempKey  *SymKey
-	tempFile string
+	Decrypter
 }
 
 func (me *Verifier) Close() error {
