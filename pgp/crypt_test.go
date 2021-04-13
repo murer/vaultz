@@ -15,8 +15,11 @@ func TestKeyGen(t *testing.T) {
 	assert.Equal(t, "test", kp.UserName())
 	assert.Equal(t, "test@sample.com", kp.UserEmail())
 	assert.NotEmpty(t, kp.ExportPub())
+	assert.Regexp(t, "-----END PGP PUBLIC KEY BLOCK-----$", kp.ExportPub())
 	assert.NotEmpty(t, kp.ExportPriv())
+	assert.Regexp(t, "-----END PGP PRIVATE KEY BLOCK-----$", kp.ExportPriv())
 	assert.NotEmpty(t, kp.Id())
+
 	fmt.Printf("id: %s\n", kp.Id())
 
 	pubkp := KeyImport(kp.ExportPub())
