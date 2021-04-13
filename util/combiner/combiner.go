@@ -1,25 +1,31 @@
-package pgp
+package combiner
 
 import (
-	"fmt"
 	"log"
-	"testing"
 )
 
-type combinator struct {
+type Combiner struct {
 	ids        []string
 	tuple      []int
 	hasStarted bool
 }
 
-func (me *combinator) checkPosition(position int, value int) {
+func Combine(ids []string, tupleSize int) *Combiner {
+	return &Combiner{
+		ids:        ids,
+		tuple:      make([]int, tupleSize),
+		hasStarted: false,
+	}
+}
+
+func (me *Combiner) checkPosition(position int, value int) {
 	max := len(me.ids) + position - len(me.tuple)
 	if value > max || value < 0 {
 		log.Panicf("wrong for position: %d, max: %d, but it is: %d, len ids: %d, len tuple: %d", position, max, value, len(me.ids), len(me.tuple))
 	}
 }
 
-func (me *combinator) setPosition(position int, value int) {
+func (me *Combiner) setPosition(position int, value int) {
 	me.hasStarted = true
 	for i := position; i < len(me.tuple); i++ {
 		nv := value + i - position
@@ -28,7 +34,7 @@ func (me *combinator) setPosition(position int, value int) {
 	}
 }
 
-func (me *combinator) detuple() []string {
+func (me *Combiner) detuple() []string {
 	ret := make([]string, len(me.tuple))
 	for i := 0; i < len(me.tuple); i++ {
 		ret[i] = me.ids[me.tuple[i]]
@@ -36,7 +42,7 @@ func (me *combinator) detuple() []string {
 	return ret
 }
 
-func (me *combinator) Next() []string {
+func (me *Combiner) Next() []string {
 	if !me.hasStarted {
 		me.setPosition(0, 0)
 		return me.detuple()
@@ -50,7 +56,7 @@ func (me *combinator) Next() []string {
 	return []string{}
 }
 
-func (me *combinator) Total() uint64 {
+func (me *Combiner) Total() uint64 {
 	x := len(me.ids) - len(me.tuple)
 	ret := uint64(1)
 	for i := x + 1; i <= len(me.ids); i++ {
@@ -61,21 +67,4 @@ func (me *combinator) Total() uint64 {
 		y = y * uint64(i)
 	}
 	return ret / y
-}
-
-func TestLockPoc(t *testing.T) {
-
-	comb := &combinator{
-		tuple:      make([]int, 2),
-		hasStarted: false,
-	}
-	max := 40
-	comb.ids = make([]string, max)
-	for i := 0; i < max; i++ {
-		comb.ids[i] = fmt.Sprintf("%d", i)
-	}
-	fmt.Printf("total: %d\n", comb.Total())
-	for i := comb.Next(); len(i) > 0; i = comb.Next() {
-		//fmt.Printf("x: %v\n", i)
-	}
 }
