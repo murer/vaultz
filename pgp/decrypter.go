@@ -45,6 +45,9 @@ func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	if !me.msg.IsEncrypted {
 		log.Panicf("Decrypt, it is not encrypted")
 	}
+	if !me.msg.IsSigned {
+		log.Panicf("Decrypt, it is not signed")
+	}
 	decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
 	log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
 	return me.msg.UnverifiedBody
