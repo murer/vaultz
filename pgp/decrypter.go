@@ -13,7 +13,11 @@ import (
 )
 
 func DecrypterCreate(plain io.Reader, writers *KeyRing, readers *KeyRing) *Decrypter {
-	return &Decrypter{plain: plain, writers: writers, readers: readers}
+	return &Decrypter{plain: plain, writers: writers, readers: readers, verifyOnly: false}
+}
+
+func VerifierCreate(plain io.Reader, writers *KeyRing) *Decrypter {
+	return &Decrypter{plain: plain, writers: writers, verifyOnly: true}
 }
 
 type Decrypter struct {
@@ -25,6 +29,8 @@ type Decrypter struct {
 	msg      *openpgp.MessageDetails
 	tempKey  *SymKey
 	tempFile string
+
+	verifyOnly bool
 }
 
 func (me *Decrypter) Close() error {
@@ -38,18 +44,23 @@ func (me *Decrypter) Close() error {
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	ar, err := armor.Decode(me.plain)
 	util.Check(err)
-	keys := append(me.readers.toPgpEntityList(), me.writers.toPgpEntityList()...)
+	keys := me.writers.toPgpEntityList()
+	if !me.verifyOnly {
+		keys = append(keys, me.readers.toPgpEntityList()...)
+	}
 	msg, err := openpgp.ReadMessage(ar.Body, keys, nil, nil)
 	util.Check(err)
 	me.msg = msg
-	if !me.msg.IsEncrypted {
-		log.Panicf("Decrypt, it is not encrypted")
+	if !me.verifyOnly {
+		if !me.msg.IsEncrypted {
+			log.Panicf("Decrypt, it is not encrypted")
+		}
+		decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
+		log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
 	}
 	if !me.msg.IsSigned {
 		log.Panicf("Decrypt, it is not signed")
 	}
-	decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
-	log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
 	return me.msg.UnverifiedBody
 }
 
@@ -75,7 +86,7 @@ func (me *Decrypter) decryptToTemp() {
 	defer encrypter.Close()
 	total, err := io.Copy(encrypter.Encrypt(), unsafe)
 	util.Check(err)
-	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
+	log.Printf("Decrypt to %s, total: %d, verifyOnly: %t", f.Name(), total, me.verifyOnly)
 	me.tempFile = f.Name()
 }
 
