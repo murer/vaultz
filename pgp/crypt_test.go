@@ -1,8 +1,8 @@
 package pgp
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -45,7 +45,7 @@ func TestCryptWrongDecrypt(t *testing.T) {
 	recipients := KeyRingCreate(bob)
 	ciphered := EncryptString("mymsg", maria, recipients)
 	writers := KeyRingCreate(maria.PubOnly())
-	decrypter := DecrypterCreate(strings.NewReader(ciphered), writers, KeyRingCreate())
+	decrypter := DecrypterCreate(bytes.NewReader(ciphered), writers, KeyRingCreate())
 	defer decrypter.Close()
 	assert.Panics(t, func() {
 		decrypter.DecryptString()
@@ -57,7 +57,24 @@ func TestCryptWrongSign(t *testing.T) {
 	bob := KeyGenerate("bob", "bob@sample.com")
 	recipients := KeyRingCreate(bob)
 	ciphered := EncryptString("mymsg", maria, recipients)
-	decrypter := DecrypterCreate(strings.NewReader(ciphered), KeyRingCreate(bob), KeyRingCreate(bob))
+	decrypter := DecrypterCreate(bytes.NewReader(ciphered), KeyRingCreate(bob), KeyRingCreate(bob))
+	defer decrypter.Close()
+	assert.Panics(t, func() {
+		decrypter.DecryptString()
+	})
+}
+
+func TestCryptWrongWriter(t *testing.T) {
+	maria := KeyGenerate("maria", "maria@sample.com")
+	bob := KeyGenerate("bob", "bob@sample.com")
+	john := KeyGenerate("john", "john@sample.com")
+	recipients := KeyRingCreate(bob, john)
+	ciphered := EncryptString("mymsg", john, recipients)
+	readers := KeyRingCreate(john)
+	decrypter := DecrypterCreate(bytes.NewReader(ciphered), KeyRingCreate(), readers)
+	defer decrypter.Close()
+	writers := KeyRingCreate(maria)
+	decrypter = DecrypterCreate(bytes.NewReader(ciphered), writers, readers)
 	defer decrypter.Close()
 	assert.Panics(t, func() {
 		decrypter.DecryptString()
@@ -70,31 +87,15 @@ func TestCrypt(t *testing.T) {
 	john := KeyGenerate("john", "john@sample.com")
 	recipients := KeyRingCreate(bob, john)
 	ciphered := EncryptString("mymsg", maria, recipients)
+	// fmt.Println(ArmorEncodeString(ciphered, "PGP MESSAGE"))
 	readers := KeyRingCreate(john)
-	decrypter := DecrypterCreate(strings.NewReader(ciphered), KeyRingCreate(), readers)
+	decrypter := DecrypterCreate(bytes.NewReader(ciphered), KeyRingCreate(), readers)
 	defer decrypter.Close()
 	unsafePlain := decrypter.UnsafeDecryptString()
 	assert.Equal(t, "mymsg", unsafePlain)
 	writers := KeyRingCreate(maria)
-	decrypter = DecrypterCreate(strings.NewReader(ciphered), writers, readers)
+	decrypter = DecrypterCreate(bytes.NewReader(ciphered), writers, readers)
 	defer decrypter.Close()
 	plain := decrypter.DecryptString()
 	assert.Equal(t, "mymsg", plain)
-}
-
-func TestCryptWrongWriter(t *testing.T) {
-	maria := KeyGenerate("maria", "maria@sample.com")
-	bob := KeyGenerate("bob", "bob@sample.com")
-	john := KeyGenerate("john", "john@sample.com")
-	recipients := KeyRingCreate(bob, john)
-	ciphered := EncryptString("mymsg", john, recipients)
-	readers := KeyRingCreate(john)
-	decrypter := DecrypterCreate(strings.NewReader(ciphered), KeyRingCreate(), readers)
-	defer decrypter.Close()
-	writers := KeyRingCreate(maria)
-	decrypter = DecrypterCreate(strings.NewReader(ciphered), writers, readers)
-	defer decrypter.Close()
-	assert.Panics(t, func() {
-		decrypter.DecryptString()
-	})
 }
