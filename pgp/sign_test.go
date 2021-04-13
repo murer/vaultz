@@ -13,7 +13,7 @@ func TestSign(t *testing.T) {
 	signed := SignString("mymsg", maria)
 	fmt.Println(signed)
 
-	decrypter := DecrypterCreate(strings.NewReader(signed), KeyRingCreate(maria), KeyRingCreate(maria))
+	decrypter := VerifierCreate(strings.NewReader(signed), KeyRingCreate(maria))
 	defer decrypter.Close()
-	assert.Equal(t, "mymsg", decrypter.Decrypt())
+	assert.Equal(t, "mymsg", decrypter.DecryptString())
 }
