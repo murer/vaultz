@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/murer/vaultz/util"
-	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 
 	"golang.org/x/crypto/openpgp"
@@ -43,29 +42,27 @@ type KeyPair struct {
 	pgpkey *openpgp.Entity
 }
 
-func (me *KeyPair) ExportPub() string {
+func (me *KeyPair) ExportPubBinary() []byte {
 	buf := new(bytes.Buffer)
-	func() {
-		a, err := armor.Encode(buf, openpgp.PublicKeyType, nil)
-		util.Check(err)
-		defer a.Close()
-		util.Check(me.pgpkey.Serialize(a))
-	}()
-	return buf.String()
+	util.Check(me.pgpkey.Serialize(buf))
+	return buf.Bytes()
+}
+
+func (me *KeyPair) ExportPrivBinary() []byte {
+	buf := new(bytes.Buffer)
+	util.Check(me.pgpkey.SerializePrivate(buf, nil))
+	return buf.Bytes()
+}
+
+func (me *KeyPair) ExportPub() string {
+	return ArmorEncodeBytes([]byte(me.ExportPubBinary()), openpgp.PublicKeyType)
 }
 
 func (me *KeyPair) ExportPriv() string {
 	if me.pgpkey.PrivateKey == nil {
 		return ""
 	}
-	buf := new(bytes.Buffer)
-	func() {
-		a, err := armor.Encode(buf, openpgp.PrivateKeyType, nil)
-		util.Check(err)
-		defer a.Close()
-		me.pgpkey.SerializePrivate(a, nil)
-	}()
-	return buf.String()
+	return ArmorEncodeBytes([]byte(me.ExportPrivBinary()), openpgp.PrivateKeyType)
 }
 
 func (me *KeyPair) Id() string {
