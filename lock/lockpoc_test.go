@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 type combinator struct {
@@ -78,8 +76,6 @@ func TestLockPoc(t *testing.T) {
 	}
 	fmt.Printf("total: %d\n", comb.Total())
 	for i := comb.Next(); len(i) > 0; i = comb.Next() {
-		fmt.Printf("x: %v\n", i)
+		//fmt.Printf("x: %v\n", i)
 	}
-
-	assert.Fail(t, "a")
 }
