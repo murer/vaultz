@@ -9,7 +9,6 @@ import (
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
 )
 
 func DecrypterCreate(plain io.Reader, writers *KeyRing, readers *KeyRing) *Decrypter {
@@ -42,13 +41,13 @@ func (me *Decrypter) Close() error {
 }
 
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
-	ar, err := armor.Decode(me.plain)
-	util.Check(err)
+	// ar, err := armor.Decode(me.plain)
+	// util.Check(err)
 	keys := me.writers.toPgpEntityList()
 	if !me.verifyOnly {
 		keys = append(keys, me.readers.toPgpEntityList()...)
 	}
-	msg, err := openpgp.ReadMessage(ar.Body, keys, nil, nil)
+	msg, err := openpgp.ReadMessage(me.plain, keys, nil, nil)
 	util.Check(err)
 	me.msg = msg
 	if !me.verifyOnly {
@@ -76,7 +75,6 @@ func (me *Decrypter) UnsafeDecryptString() string {
 }
 
 func (me *Decrypter) decryptToTemp() {
-	// TODO: must be encrypted
 	unsafe := me.UnsafeDecrypt()
 	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)

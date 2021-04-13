@@ -7,7 +7,6 @@ import (
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
 )
 
 type Encrypter struct {
@@ -17,7 +16,7 @@ type Encrypter struct {
 	signer     *KeyPair
 	recipients *KeyRing
 
-	armor  io.WriteCloser
+	// armor  io.WriteCloser
 	writer io.WriteCloser
 
 	byteCount uint64
@@ -32,11 +31,11 @@ func EncypterCreate(ciphered io.Writer, signer *KeyPair, recipients *KeyRing) *E
 }
 
 func (me *Encrypter) Encrypt() io.WriteCloser {
-	wa, err := armor.Encode(me.ciphered, "PGP MESSAGE", nil)
+	// wa, err := armor.Encode(me.ciphered, "PGP MESSAGE", nil)
+	// util.Check(err)
+	ew, err := openpgp.Encrypt(me.ciphered, me.recipients.toPgpEntityList(), me.signer.pgpkey, nil, nil)
 	util.Check(err)
-	ew, err := openpgp.Encrypt(wa, me.recipients.toPgpEntityList(), me.signer.pgpkey, nil, nil)
-	util.Check(err)
-	me.armor = wa
+	// me.armor = wa
 	me.writer = ew
 	log.Printf("Encrypt start, signer: %s %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
 	for _, v := range me.recipients.kps {
@@ -53,11 +52,11 @@ func (me *Encrypter) Write(p []byte) (n int, err error) {
 func (me *Encrypter) Close() error {
 	log.Printf("Encrypt done, size: %d", me.byteCount)
 	we := me.writer.Close()
-	ae := me.armor.Close()
-	if we != nil {
-		return we
-	}
-	return ae
+	// ae := me.armor.Close()
+	// if we != nil {
+	return we
+	// }
+	// return ae
 }
 
 func _encryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) *bytes.Buffer {
