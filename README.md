@@ -11,12 +11,11 @@
 .vaultz/dextra/keyring/ed.pubkey
 .vaultz/dextra/keyring/murer.pubkey
 
-.vaultz/dextra/safe/dsa/writer/murer.id
-.vaultz/dextra/safe/dsa/writer/fernando.id
-
-.vaultz/dextra/safe/dsa/reader/leo.id
-.vaultz/dextra/safe/dsa/reader/lucas.id
-.vaultz/dextra/safe/dsa/reader/alvaro.id
+.vaultz/dextra/padlock/dsa/writer/murer.id
+.vaultz/dextra/padlock/dsa/writer/fernando.id
+.vaultz/dextra/padlock/dsa/reader/leo.id
+.vaultz/dextra/padlock/dsa/reader/lucas.id
+.vaultz/dextra/padlock/dsa/reader/alvaro.id
 ```
 
 ```shell
