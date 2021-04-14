@@ -2,23 +2,25 @@ package lock
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 
 	"github.com/murer/vaultz/pgp"
+	"github.com/murer/vaultz/util/combiner"
 )
 
 type Locker struct {
 	io.WriteCloser
-	ciphered io.Writer
-
+	ciphered   io.Writer
 	signer     *pgp.KeyPair
 	recipients *pgp.KeyRing
 	lockSize   int
 	byteCount  uint64
 	symKey     *pgp.SymKey
-
-	writer io.WriteCloser
+	combiner   *combiner.Combiner
+	signWriter io.WriteCloser
+	writer     io.WriteCloser
 }
 
 func LockerCreate(writer io.Writer, signer *pgp.KeyPair, recipients *pgp.KeyRing, lockSize int) *Locker {
@@ -43,7 +45,17 @@ func (me *Locker) Close() error {
 }
 
 func (me *Locker) writeLocks() {
-
+	ids := me.recipients.Ids()
+	me.combiner = combiner.Combine(ids, me.lockSize)
+	signer := pgp.SignerCreate(me.ciphered, me.signer)
+	me.signWriter = signer.Sign()
+	defer me.signWriter.Close()
+	header := map[string]string{
+		"ls": fmt.Sprintf("%d", me.lockSize),
+		"rt": fmt.Sprintf("%d", me.recipients.Size()),
+		"cs": fmt.Sprintf("%d", me.combiner.Total()),
+	}
+	me.signWriter.Write([]byte(stringify(header)))
 }
 
 func (me *Locker) Lock() io.WriteCloser {
