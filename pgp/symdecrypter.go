@@ -7,7 +7,6 @@ import (
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
 )
 
 func SymDecrypterCreate(plain io.Reader, key *SymKey) *SymDecrypter {
@@ -31,9 +30,7 @@ func (me *SymDecrypter) Close() error {
 }
 
 func (me *SymDecrypter) Decrypt() io.ReadCloser {
-	ar, err := armor.Decode(me.plain)
-	util.Check(err)
-	msg, err := openpgp.ReadMessage(ar.Body, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
+	msg, err := openpgp.ReadMessage(me.plain, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 		return me.key.key, nil
 	}, nil)
 	util.Check(err)

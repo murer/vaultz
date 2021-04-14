@@ -20,7 +20,6 @@ func TestPocSequential(t *testing.T) {
 		writer := encrypter.Encrypt()
 		writer.Write([]byte("first"))
 	}()
-	buf.Write([]byte("\n"))
 
 	func() {
 		encrypter := SymEncypterCreate(buf, s)
