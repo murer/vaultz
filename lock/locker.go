@@ -42,7 +42,12 @@ func (me *Locker) Close() error {
 	return me.writer.Close()
 }
 
+func (me *Locker) writeLocks() {
+
+}
+
 func (me *Locker) Lock() io.WriteCloser {
+	me.writeLocks()
 	symEncrypter := pgp.SymEncypterCreate(me.ciphered, me.symKey)
 	me.writer = symEncrypter.Encrypt()
 	return me
