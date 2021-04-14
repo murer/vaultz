@@ -17,7 +17,6 @@ type SymEncrypter struct {
 	ciphered io.Writer
 	key      *SymKey
 
-	armor  io.WriteCloser
 	writer io.WriteCloser
 
 	byteCount uint64
@@ -38,7 +37,6 @@ func (me *SymEncrypter) Encrypt() io.WriteCloser {
 	util.Check(err)
 	ew, err := openpgp.SymmetricallyEncrypt(wa, me.key.key, nil, packetConfig)
 	util.Check(err)
-	me.armor = wa
 	me.writer = ew
 	log.Printf("SymEncrypt start, key size: %d", me.key.Size())
 	return me
@@ -51,12 +49,7 @@ func (me *SymEncrypter) Write(p []byte) (n int, err error) {
 
 func (me *SymEncrypter) Close() error {
 	log.Printf("SymEncrypt done, size: %d", me.byteCount)
-	we := me.writer.Close()
-	ae := me.armor.Close()
-	if we != nil {
-		return we
-	}
-	return ae
+	return me.writer.Close()
 }
 
 func _symEncryptBytes(plain []byte, key *SymKey) *bytes.Buffer {
