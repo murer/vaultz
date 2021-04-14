@@ -13,12 +13,7 @@ func TestPocLock(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		ring.Add(pgp.KeyGenerate(fmt.Sprintf("u%d", i), fmt.Sprintf("u%d@sample.com", i)))
 	}
-	locker := &Locker{
-		signer:     ring.Get("x"),
-		recipients: ring,
-		lockSize:   3,
-	}
-	ciphered := locker.LockString("mymsg")
-	log.Printf("Ciphered %X", pgp.ArmorEncodeBytes(ciphered, "VAULTZ CONTENT"))
+	ciphered := LockString("mymsg", ring.Get("u"), ring, 3)
+	log.Printf("Ciphered\n%s", pgp.ArmorEncodeBytes(ciphered, "PGP MESSAGE"))
 
 }
