@@ -42,7 +42,7 @@ func (me *Locker) Close() error {
 	return me.writer.Close()
 }
 
-func (me *Locker) Lock() *Locker {
+func (me *Locker) Lock() io.WriteCloser {
 	symEncrypter := pgp.SymEncypterCreate(me.ciphered, me.symKey)
 	me.writer = symEncrypter.Encrypt()
 	return me
@@ -52,9 +52,9 @@ func LockBytes(data []byte, signer *pgp.KeyPair, recipients *pgp.KeyRing, lockSi
 	buf := new(bytes.Buffer)
 	func() {
 		locker := LockerCreate(buf, signer, recipients, lockSize)
-		locker.Lock()
+		w := locker.Lock()
 		defer locker.Close()
-		locker.Write(data)
+		w.Write(data)
 	}()
 	return buf.Bytes()
 }
