@@ -43,7 +43,13 @@ func (me *Decrypter) Close() error {
 func (me *Decrypter) UnsafeDecrypt() io.Reader {
 	// ar, err := armor.Decode(me.plain)
 	// util.Check(err)
-	keys := me.writers.toPgpEntityList()
+	if me.writers == nil && me.verifyOnly {
+		log.Panicf("Decrypt, verifyOnly without writers")
+	}
+	keys := KeyRingCreate().toPgpEntityList()
+	if me.writers != nil {
+		keys = append(keys, me.writers.toPgpEntityList()...)
+	}
 	if !me.verifyOnly {
 		keys = append(keys, me.readers.toPgpEntityList()...)
 	}
@@ -57,7 +63,7 @@ func (me *Decrypter) UnsafeDecrypt() io.Reader {
 		decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
 		log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
 	}
-	if !me.msg.IsSigned {
+	if !me.msg.IsSigned && me.writers != nil {
 		log.Panicf("Decrypt, it is not signed")
 	}
 	return me.msg.UnverifiedBody
@@ -89,6 +95,10 @@ func (me *Decrypter) decryptToTemp() {
 }
 
 func (me *Decrypter) decryptCheckSigner() {
+	if me.writers == nil {
+		log.Printf("Decrypt, no writers to be validated")
+		return
+	}
 	if me.msg.Signature == nil {
 		msg := fmt.Sprintf("Decrypt unknown signer: %X", me.msg.SignedByKeyId)
 		log.Panic(msg)
@@ -106,8 +116,10 @@ func (me *Decrypter) decryptCheckSigner() {
 func (me *Decrypter) Decrypt() io.ReadCloser {
 	me.decryptToTemp()
 	me.decryptCheckSigner()
-	signerKP := keyFromEntity(me.msg.SignedBy.Entity)
-	log.Printf("Decrypt signed by id: %s %s", signerKP.Id(), signerKP.UserName())
+	if me.writers != nil {
+		signerKP := keyFromEntity(me.msg.SignedBy.Entity)
+		log.Printf("Decrypt signed by id: %s %s", signerKP.Id(), signerKP.UserName())
+	}
 	f, err := os.Open(me.tempFile)
 	util.Check(err)
 	decrypter := SymDecrypterCreate(f, me.tempKey)

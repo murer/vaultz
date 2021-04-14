@@ -30,14 +30,23 @@ func EncypterCreate(ciphered io.Writer, signer *KeyPair, recipients *KeyRing) *E
 	}
 }
 
+func (me *Encrypter) getSignerKey() *openpgp.Entity {
+	if me.signer == nil {
+		return nil
+	}
+	return me.signer.pgpkey
+}
+
 func (me *Encrypter) Encrypt() io.WriteCloser {
 	// wa, err := armor.Encode(me.ciphered, "PGP MESSAGE", nil)
 	// util.Check(err)
-	ew, err := openpgp.Encrypt(me.ciphered, me.recipients.toPgpEntityList(), me.signer.pgpkey, nil, nil)
+	ew, err := openpgp.Encrypt(me.ciphered, me.recipients.toPgpEntityList(), me.getSignerKey(), nil, nil)
 	util.Check(err)
 	// me.armor = wa
 	me.writer = ew
-	log.Printf("Encrypt start, signer: %s %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
+	if me.getSignerKey() != nil {
+		log.Printf("Encrypt start, signer: %s %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
+	}
 	for _, v := range me.recipients.kps {
 		log.Printf("Encrypt start, recipients: %s %s", v.Id(), v.UserName())
 	}

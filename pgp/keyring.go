@@ -21,7 +21,7 @@ func KeyRingCreate(kps ...*KeyPair) *KeyRing {
 func (me *KeyRing) Ids() []string {
 	ret := make([]string, me.Size())
 	i := 0
-	for k, _ := range me.kps {
+	for k := range me.kps {
 		ret[i] = k
 		i = i + 1
 	}

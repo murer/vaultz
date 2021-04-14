@@ -81,6 +81,32 @@ func TestCryptWrongWriter(t *testing.T) {
 	})
 }
 
+func TestCryptUnsigned(t *testing.T) {
+	maria := KeyGenerate("maria", "maria@sample.com")
+	bob := KeyGenerate("bob", "bob@sample.com")
+	john := KeyGenerate("john", "john@sample.com")
+	recipients := KeyRingCreate(maria, bob, john)
+	ciphered := EncryptString("mymsg", nil, recipients)
+	readers := KeyRingCreate(john)
+	decrypter := DecrypterCreate(bytes.NewReader(ciphered), nil, readers)
+	defer decrypter.Close()
+	plain := decrypter.DecryptString()
+	assert.Equal(t, "mymsg", plain)
+}
+
+func TestCryptSignUncheck(t *testing.T) {
+	maria := KeyGenerate("maria", "maria@sample.com")
+	bob := KeyGenerate("bob", "bob@sample.com")
+	john := KeyGenerate("john", "john@sample.com")
+	recipients := KeyRingCreate(maria, bob, john)
+	ciphered := EncryptString("mymsg", maria, recipients)
+	readers := KeyRingCreate(john)
+	decrypter := DecrypterCreate(bytes.NewReader(ciphered), nil, readers)
+	defer decrypter.Close()
+	plain := decrypter.DecryptString()
+	assert.Equal(t, "mymsg", plain)
+}
+
 func TestCrypt(t *testing.T) {
 	maria := KeyGenerate("maria", "maria@sample.com")
 	bob := KeyGenerate("bob", "bob@sample.com")
