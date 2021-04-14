@@ -14,6 +14,10 @@ func KeyRingCreate(kps ...*KeyPair) *KeyRing {
 	return ret
 }
 
+func (me *KeyRing) Get(name string) *KeyPair {
+	return me.kps[name]
+}
+
 func (me *KeyRing) _add(kp *KeyPair) {
 	id := kp.Id()
 	me.kps[id] = kp
