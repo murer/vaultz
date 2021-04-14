@@ -58,3 +58,38 @@ vaultz dextra padlock dsa import -i dsa.ids.padlock.vaultz # confirm user intera
 vaultz dextra export -o dextra.namespace.vaultz
 vaultz dextra import -i dextra.namespace.vaultz
 ```
+
+
+Signed by writer
+```json
+{
+    "symkeyhash": "aBedDE",
+    "recipientSize": "5",
+    "lockSize": "3"
+}
+```
+
+Encrypted to pubkey1, signed by writer
+```
+binary pin1
+```
+
+Encrypted to pubkey2, signed by writer
+```
+binary pin2
+```
+
+sym encrypt with pin1+pin2+pin3, signed by writer
+```
+symkey
+```
+
+sym encrypt with pin1+pin2+pin4, signed by writer
+```
+symkey
+```
+
+sym encrypt with symkey, signed by writer
+```
+payload
+```
