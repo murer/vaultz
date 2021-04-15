@@ -36,4 +36,5 @@ func TestKeyGen(t *testing.T) {
 	assert.NotEmpty(t, privkp.ExportPriv())
 	assert.Equal(t, kp.Id(), privkp.Id())
 	fmt.Printf("id: %s\n", privkp.Id())
+
 }

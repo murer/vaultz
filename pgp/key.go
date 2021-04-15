@@ -2,27 +2,16 @@ package pgp
 
 import (
 	"bytes"
-	"crypto"
 	"log"
 	"strings"
 
 	"github.com/murer/vaultz/util"
-	"golang.org/x/crypto/openpgp/packet"
 
 	"golang.org/x/crypto/openpgp"
 )
 
 func KeyGenerate(name string, email string) *KeyPair {
-	config := &packet.Config{
-		DefaultHash:            crypto.SHA256,
-		DefaultCipher:          packet.CipherAES256,
-		DefaultCompressionAlgo: packet.CompressionZLIB,
-		CompressionConfig: &packet.CompressionConfig{
-			Level: packet.BestCompression,
-		},
-		RSABits: 1024,
-	}
-	pgpkey, err := openpgp.NewEntity(name, name, email, config)
+	pgpkey, err := openpgp.NewEntity(name, name, email, Config)
 	util.Check(err)
 	ret := &KeyPair{pgpkey: pgpkey}
 	log.Printf("KeyGenerate: %s %s", ret.Id(), ret.UserName())

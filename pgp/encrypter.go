@@ -79,7 +79,7 @@ func (me *Encrypter) getSignerKey() *openpgp.Entity {
 }
 
 func (me *Encrypter) openSigner() io.Writer {
-	signerWriter, err := openpgp.Sign(me.writer, me.getSignerKey(), nil, nil)
+	signerWriter, err := openpgp.Sign(me.writer, me.getSignerKey(), nil, Config)
 	util.Check(err)
 	me.signerWriter = signerWriter
 	if me.getSignerKey() != nil {
@@ -90,7 +90,7 @@ func (me *Encrypter) openSigner() io.Writer {
 }
 
 func (me *Encrypter) openEncrypt() io.Writer {
-	encryptWriter, err := openpgp.Encrypt(me.writer, me.recipients.toPgpEntityList(), me.getSignerKey(), nil, nil)
+	encryptWriter, err := openpgp.Encrypt(me.writer, me.recipients.toPgpEntityList(), me.getSignerKey(), nil, Config)
 	util.Check(err)
 	me.encryptWriter = encryptWriter
 	if me.getSignerKey() != nil {

@@ -104,7 +104,7 @@ func (me *Decrypter) checkSign() {
 func (me *Decrypter) openSymDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(me.reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 		return me.symKey.key, nil
-	}, nil)
+	}, Config)
 	util.Check(err)
 	me.msg = msg
 	log.Printf("Decrypt, symmetric with key size: %d", me.symKey.Size())
