@@ -2,12 +2,14 @@ package pgp
 
 import (
 	"bytes"
+	"crypto"
 	"log"
 	"strings"
 
 	"github.com/murer/vaultz/util"
 
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/s2k"
 )
 
 func KeyGenerate(name string, email string) *KeyPair {
@@ -24,7 +26,9 @@ func KeyImport(encodedKey string) *KeyPair {
 	ret := &KeyPair{pgpkey: lst[0]}
 	for k, v := range ret.pgpkey.Identities {
 		log.Printf("X: %s = '%#v'\n", k, v)
-		v.SelfSignature.PreferredHash = []uint8{8}
+		id, ok := s2k.HashToHashId(crypto.SHA256)
+		util.Assert(!ok, "hash not found")
+		v.SelfSignature.PreferredHash = []uint8{id}
 	}
 	return ret
 }
