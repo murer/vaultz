@@ -42,9 +42,9 @@ func TestPocSequential(t *testing.T) {
 	// log.Printf("rest: %s", string(d))
 
 	func() {
-		decrypter := SymDecrypterCreate(buf, s)
+		decrypter := CreateDecrypter(buf).Symmetric(s)
 		defer decrypter.Close()
-		reader := decrypter.Decrypt()
+		reader := decrypter.Start()
 		data, err := ioutil.ReadAll(reader)
 		util.Check(err)
 		assert.Equal(t, "second", string(data))
