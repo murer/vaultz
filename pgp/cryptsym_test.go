@@ -1,7 +1,7 @@
 package pgp
 
 import (
-	"strings"
+	"bytes"
 	"testing"
 
 	"github.com/murer/vaultz/util"
@@ -20,17 +20,10 @@ func TestSymKeyGen(t *testing.T) {
 
 	assert.NotEqual(t, ciphered1, ciphered2)
 
-	// decrypter := SymDecrypterCreate(strings.NewReader(ciphered1), k1)
-	// defer decrypter.Close()
-	// assert.Equal(t, "mymsg", decrypter.DecryptString())
-	// decrypter = SymDecrypterCreate(strings.NewReader(ciphered2), k1)
-	// defer decrypter.Close()
-	// assert.Equal(t, "mymsg", decrypter.DecryptString())
-
-	decrypter := CreateDecrypter(strings.NewReader(ciphered1))
+	decrypter := CreateDecrypter(bytes.NewReader(ciphered1))
 	defer decrypter.Close()
 	assert.Equal(t, "mymsg", util.ReadAllString(decrypter.Symmetric(k1).Start()))
-	decrypter = CreateDecrypter(strings.NewReader(ciphered2))
+	decrypter = CreateDecrypter(bytes.NewReader(ciphered2))
 	defer decrypter.Close()
 	assert.Equal(t, "mymsg", util.ReadAllString(decrypter.Symmetric(k1).Start()))
 

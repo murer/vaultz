@@ -151,3 +151,17 @@ func EncryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) []byte {
 func EncryptString(plain string, signer *KeyPair, ring *KeyRing) []byte {
 	return EncryptBytes([]byte(plain), signer, ring)
 }
+
+func SymEncryptBytes(plain []byte, key *SymKey) []byte {
+	buf := new(bytes.Buffer)
+	func() {
+		encrypter := CreateEncrypter(buf).Symmetric(key)
+		defer encrypter.Close()
+		encrypter.Start().Write(plain)
+	}()
+	return buf.Bytes()
+}
+
+func SymEncryptString(plain string, key *SymKey) []byte {
+	return SymEncryptBytes([]byte(plain), key)
+}

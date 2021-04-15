@@ -22,9 +22,9 @@ func TestPocSequential(t *testing.T) {
 	}()
 
 	func() {
-		encrypter := SymEncypterCreate(buf, s)
+		encrypter := CreateEncrypter(buf).Symmetric(s)
 		defer encrypter.Close()
-		writer := encrypter.Encrypt()
+		writer := encrypter.Start()
 		writer.Write([]byte("second"))
 	}()
 
