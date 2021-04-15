@@ -26,26 +26,6 @@ type Decrypter2 struct {
 	tempFileReader io.ReadCloser
 }
 
-type Decryptor2Reader struct {
-	decrypter *Decrypter2
-}
-
-func (me *Decryptor2Reader) Read(p []byte) (n int, err error) {
-	return me.decrypter.reader.Read(p)
-}
-
-func (me *Decrypter2) Close() error {
-	if me.tempFileReader != nil {
-		log.Printf("Decrypter closing, closing temp file: %s", me.tempFile)
-		me.tempFileReader.Close()
-	}
-	if me.tempFile != "" {
-		log.Printf("Decrypter closing, deleting file: %s", me.tempFile)
-		os.Remove(me.tempFile)
-	}
-	return nil
-}
-
 func CreateDecrypter(reader io.Reader) *Decrypter2 {
 	return &Decrypter2{originalReader: reader}
 }
@@ -177,4 +157,24 @@ func (me *Decrypter2) decryptToTemp() {
 	util.Check(err)
 	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
 	me.tempFile = f.Name()
+}
+
+type Decryptor2Reader struct {
+	decrypter *Decrypter2
+}
+
+func (me *Decryptor2Reader) Read(p []byte) (n int, err error) {
+	return me.decrypter.reader.Read(p)
+}
+
+func (me *Decrypter2) Close() error {
+	if me.tempFileReader != nil {
+		log.Printf("Decrypter closing, closing temp file: %s", me.tempFile)
+		me.tempFileReader.Close()
+	}
+	if me.tempFile != "" {
+		log.Printf("Decrypter closing, deleting file: %s", me.tempFile)
+		os.Remove(me.tempFile)
+	}
+	return nil
 }
