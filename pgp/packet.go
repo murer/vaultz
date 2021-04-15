@@ -13,5 +13,5 @@ var Config = &packet.Config{
 	CompressionConfig: &packet.CompressionConfig{
 		Level: packet.BestCompression,
 	},
-	RSABits: 1024,
+	RSABits: 4096,
 }
