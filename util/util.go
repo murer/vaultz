@@ -12,6 +12,13 @@ func Check(err error) {
 	}
 }
 
+func Checkf(err error, msg string, args ...interface{}) {
+	if err != nil {
+		log.Printf(msg, args...)
+		panic(err)
+	}
+}
+
 func Assert(cond bool, msg string, v ...interface{}) {
 	if cond {
 		log.Panicf(msg, v...)

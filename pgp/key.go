@@ -22,7 +22,10 @@ func KeyImport(encodedKey string) *KeyPair {
 	lst, err := openpgp.ReadArmoredKeyRing(strings.NewReader(encodedKey))
 	util.Check(err)
 	ret := &KeyPair{pgpkey: lst[0]}
-	log.Printf("KeyImport: %s %s", ret.Id(), ret.UserName())
+	for k, v := range ret.pgpkey.Identities {
+		log.Printf("X: %s = '%#v'\n", k, v)
+		v.SelfSignature.PreferredHash = []uint8{8}
+	}
 	return ret
 }
 
@@ -42,7 +45,7 @@ func (me *KeyPair) ExportPubBinary() []byte {
 
 func (me *KeyPair) ExportPrivBinary() []byte {
 	buf := new(bytes.Buffer)
-	util.Check(me.pgpkey.SerializePrivate(buf, nil))
+	util.Check(me.pgpkey.SerializePrivate(buf, Config))
 	return buf.Bytes()
 }
 
