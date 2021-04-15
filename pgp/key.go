@@ -46,11 +46,11 @@ func (me *KeyPair) ExportPrivBinary() []byte {
 	return buf.Bytes()
 }
 
-func (me *KeyPair) ExportPub() string {
+func (me *KeyPair) ExportPubArmored() string {
 	return ArmorEncodeBytes([]byte(me.ExportPubBinary()), openpgp.PublicKeyType)
 }
 
-func (me *KeyPair) ExportPriv() string {
+func (me *KeyPair) ExportPrivArmored() string {
 	if me.pgpkey.PrivateKey == nil {
 		return ""
 	}
@@ -76,5 +76,5 @@ func (me *KeyPair) UserEmail() string {
 }
 
 func (me *KeyPair) PubOnly() *KeyPair {
-	return KeyImport(me.ExportPub())
+	return KeyImport(me.ExportPubArmored())
 }

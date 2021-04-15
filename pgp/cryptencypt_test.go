@@ -86,7 +86,7 @@ func TestCrypt(t *testing.T) {
 	john := KeyGenerate("john", "john@sample.com")
 	recipients := KeyRingCreate(maria, bob, john)
 	ciphered := EncryptString("mymsg", maria, recipients)
-	// fmt.Println(maria.ExportPriv())
+	// fmt.Println(maria.ExportPrivArmored())
 	// fmt.Println(ArmorEncodeBytes(ciphered, "PGP MESSAGE"))
 	readers := KeyRingCreate(john)
 	decrypter := CreateDecrypter(bytes.NewReader(ciphered)).Signers(nil).Decrypt(readers)
