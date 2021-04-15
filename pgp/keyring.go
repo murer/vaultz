@@ -1,6 +1,7 @@
 package pgp
 
 import (
+	"log"
 	"sort"
 
 	"golang.org/x/crypto/openpgp"
@@ -39,6 +40,9 @@ func (me *KeyRing) Get(name string) *KeyPair {
 
 func (me *KeyRing) _add(kp *KeyPair) {
 	id := kp.Id()
+	if me.kps[id] != nil {
+		log.Panicf("KeyId collision in the ring: %s", id)
+	}
 	me.kps[id] = kp
 }
 
