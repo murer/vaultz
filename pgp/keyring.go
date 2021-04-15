@@ -60,3 +60,11 @@ func (me *KeyRing) toPgpEntityList() openpgp.EntityList {
 	}
 	return ret
 }
+
+func (me *KeyRing) PubOnly() *KeyRing {
+	ret := KeyRingCreate()
+	for _, v := range me.kps {
+		ret.Add(v.PubOnly())
+	}
+	return ret
+}
