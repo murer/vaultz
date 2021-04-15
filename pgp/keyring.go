@@ -8,25 +8,36 @@ import (
 )
 
 type KeyRing struct {
-	kps map[string]*KeyPair
+	kps map[uint64]*KeyPair
 }
 
 func KeyRingCreate(kps ...*KeyPair) *KeyRing {
 	ret := &KeyRing{
-		kps: make(map[string]*KeyPair),
+		kps: make(map[uint64]*KeyPair),
 	}
 	ret.Add(kps...)
 	return ret
 }
 
-func (me *KeyRing) Ids() []string {
+func (me *KeyRing) IdString() []string {
 	ret := make([]string, me.Size())
 	i := 0
-	for k := range me.kps {
-		ret[i] = k
+	for _, v := range me.kps {
+		ret[i] = v.Id()
 		i = i + 1
 	}
 	sort.Strings(ret)
+	return ret
+}
+
+func (me *KeyRing) Ids() []uint64 {
+	ret := make([]uint64, me.Size())
+	i := 0
+	for _, v := range me.kps {
+		ret[i] = v.IdBinary()
+		i = i + 1
+	}
+	sort.Slice(ret, func(a int, b int) bool { return ret[a] < ret[b] })
 	return ret
 }
 
@@ -34,14 +45,14 @@ func (me *KeyRing) Size() int {
 	return len(me.kps)
 }
 
-func (me *KeyRing) Get(name string) *KeyPair {
-	return me.kps[name]
+func (me *KeyRing) Get(id uint64) *KeyPair {
+	return me.kps[id]
 }
 
 func (me *KeyRing) _add(kp *KeyPair) {
-	id := kp.Id()
+	id := kp.IdBinary()
 	if me.kps[id] != nil {
-		log.Panicf("KeyId collision in the ring: %s", id)
+		log.Panicf("KeyId collision in the ring: %X", id)
 	}
 	me.kps[id] = kp
 }
