@@ -5,7 +5,9 @@ import (
 	"log"
 
 	"github.com/murer/vaultz/util"
+	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
+	"golang.org/x/crypto/openpgp/packet"
 )
 
 type Encrypter2 struct {
@@ -17,6 +19,8 @@ type Encrypter2 struct {
 
 	writer        io.Writer
 	armoredWriter io.WriteCloser
+	symWriter     io.WriteCloser
+	encryptWriter io.WriteCloser
 }
 
 func CreateEncrypter(writer io.Writer) *Encrypter2 {
@@ -56,8 +60,46 @@ func (me *Encrypter2) Start() io.Writer {
 		log.Printf("Encrypter, armor parsing only")
 		return &encrypter2Writer{encrypter: me}
 	}
+	if me.symKey != nil {
+		return me.openSymEncrypt()
+	}
 
-	return nil
+	return me.openEncrypt()
+}
+
+func (me *Encrypter2) getSignerKey() *openpgp.Entity {
+	if me.signer == nil {
+		return nil
+	}
+	return me.signer.pgpkey
+}
+
+func (me *Encrypter2) openEncrypt() io.Writer {
+	encryptWriter, err := openpgp.Encrypt(me.writer, me.recipients.toPgpEntityList(), me.getSignerKey(), nil, nil)
+	util.Check(err)
+	me.encryptWriter = encryptWriter
+	if me.getSignerKey() != nil {
+		log.Printf("Encrypt, signer: %s %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
+	} else {
+		log.Printf("Encrypt, no signer, total recipients: %d", len(me.recipients.kps))
+	}
+	for _, v := range me.recipients.kps {
+		log.Printf("Encrypt, recipients: %s %s", v.Id(), v.UserName())
+	}
+	me.writer = encryptWriter
+	return encryptWriter
+}
+
+func (me *Encrypter2) openSymEncrypt() io.Writer {
+	packetConfig := &packet.Config{
+		DefaultCipher: packet.CipherAES256,
+	}
+	symWriter, err := openpgp.SymmetricallyEncrypt(me.writer, me.symKey.key, nil, packetConfig)
+	util.Check(err)
+	me.symWriter = symWriter
+	log.Printf("Encrypt, symmetric with key size: %d", me.symKey.Size())
+	me.writer = symWriter
+	return &encrypter2Writer{encrypter: me}
 }
 
 func (me *Encrypter2) preapreArmored() {
@@ -80,6 +122,14 @@ func (me *encrypter2Writer) Write(p []byte) (n int, err error) {
 }
 
 func (me *Encrypter2) Close() error {
+	if me.encryptWriter != nil {
+		log.Printf("Encrypter, closing encrypt writer writer")
+		me.encryptWriter.Close()
+	}
+	if me.symWriter != nil {
+		log.Printf("Encrypter, closing symmetric writer writer")
+		me.symWriter.Close()
+	}
 	if me.armoredWriter != nil {
 		log.Printf("Encrypter, closing armored writer")
 		me.armoredWriter.Close()
