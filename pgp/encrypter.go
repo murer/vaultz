@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/openpgp/packet"
 )
 
-type Encrypter2 struct {
+type Encrypter struct {
 	originalWriter io.Writer
 	armored        string
 	recipients     *KeyRing
@@ -24,31 +24,31 @@ type Encrypter2 struct {
 	signerWriter  io.WriteCloser
 }
 
-func CreateEncrypter(writer io.Writer) *Encrypter2 {
-	return &Encrypter2{originalWriter: writer}
+func CreateEncrypter(writer io.Writer) *Encrypter {
+	return &Encrypter{originalWriter: writer}
 }
 
-func (me *Encrypter2) Armored(blockType string) *Encrypter2 {
+func (me *Encrypter) Armored(blockType string) *Encrypter {
 	me.armored = blockType
 	return me
 }
 
-func (me *Encrypter2) Encrypt(recipients *KeyRing) *Encrypter2 {
+func (me *Encrypter) Encrypt(recipients *KeyRing) *Encrypter {
 	me.recipients = recipients
 	return me
 }
 
-func (me *Encrypter2) Sign(signer *KeyPair) *Encrypter2 {
+func (me *Encrypter) Sign(signer *KeyPair) *Encrypter {
 	me.signer = signer
 	return me
 }
 
-func (me *Encrypter2) Symmetric(key *SymKey) *Encrypter2 {
+func (me *Encrypter) Symmetric(key *SymKey) *Encrypter {
 	me.symKey = key
 	return me
 }
 
-func (me *Encrypter2) Start() io.Writer {
+func (me *Encrypter) Start() io.Writer {
 	util.Assert(me.originalWriter == nil, "Writer is required")
 	util.Assert(me.symKey == nil && me.recipients == nil && me.signer == nil && me.armored == "", "Nothing to do")
 	util.Assert(me.symKey != nil && me.recipients != nil, "Symmetric encryption can not have recipients")
@@ -59,7 +59,7 @@ func (me *Encrypter2) Start() io.Writer {
 
 	if me.symKey == nil && me.recipients == nil && me.signer == nil {
 		log.Printf("Encrypter, armor parsing only")
-		return &encrypter2Writer{encrypter: me}
+		return &encrypterWriter{encrypter: me}
 	}
 	if me.symKey != nil {
 		return me.openSymEncrypt()
@@ -71,14 +71,14 @@ func (me *Encrypter2) Start() io.Writer {
 	return me.openEncrypt()
 }
 
-func (me *Encrypter2) getSignerKey() *openpgp.Entity {
+func (me *Encrypter) getSignerKey() *openpgp.Entity {
 	if me.signer == nil {
 		return nil
 	}
 	return me.signer.pgpkey
 }
 
-func (me *Encrypter2) openSigner() io.Writer {
+func (me *Encrypter) openSigner() io.Writer {
 	signerWriter, err := openpgp.Sign(me.writer, me.getSignerKey(), nil, nil)
 	util.Check(err)
 	me.signerWriter = signerWriter
@@ -89,7 +89,7 @@ func (me *Encrypter2) openSigner() io.Writer {
 	return signerWriter
 }
 
-func (me *Encrypter2) openEncrypt() io.Writer {
+func (me *Encrypter) openEncrypt() io.Writer {
 	encryptWriter, err := openpgp.Encrypt(me.writer, me.recipients.toPgpEntityList(), me.getSignerKey(), nil, nil)
 	util.Check(err)
 	me.encryptWriter = encryptWriter
@@ -105,7 +105,7 @@ func (me *Encrypter2) openEncrypt() io.Writer {
 	return encryptWriter
 }
 
-func (me *Encrypter2) openSymEncrypt() io.Writer {
+func (me *Encrypter) openSymEncrypt() io.Writer {
 	packetConfig := &packet.Config{
 		DefaultCipher: packet.CipherAES256,
 	}
@@ -114,10 +114,10 @@ func (me *Encrypter2) openSymEncrypt() io.Writer {
 	me.symWriter = symWriter
 	log.Printf("Encrypt, symmetric with key size: %d", me.symKey.Size())
 	me.writer = symWriter
-	return &encrypter2Writer{encrypter: me}
+	return &encrypterWriter{encrypter: me}
 }
 
-func (me *Encrypter2) preapreArmored() {
+func (me *Encrypter) preapreArmored() {
 	if me.armored == "" {
 		return
 	}
@@ -128,15 +128,15 @@ func (me *Encrypter2) preapreArmored() {
 	me.writer = armoredWriter
 }
 
-type encrypter2Writer struct {
-	encrypter *Encrypter2
+type encrypterWriter struct {
+	encrypter *Encrypter
 }
 
-func (me *encrypter2Writer) Write(p []byte) (n int, err error) {
+func (me *encrypterWriter) Write(p []byte) (n int, err error) {
 	return me.encrypter.writer.Write(p)
 }
 
-func (me *Encrypter2) Close() error {
+func (me *Encrypter) Close() error {
 	if me.encryptWriter != nil {
 		log.Printf("Encrypter, closing encrypt writer writer")
 		me.encryptWriter.Close()

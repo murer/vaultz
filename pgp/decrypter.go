@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-type Decrypter2 struct {
+type Decrypter struct {
 	originalReader io.Reader
 	armored        bool
 	recipients     *KeyRing
@@ -26,31 +26,31 @@ type Decrypter2 struct {
 	tempFileReader io.ReadCloser
 }
 
-func CreateDecrypter(reader io.Reader) *Decrypter2 {
-	return &Decrypter2{originalReader: reader}
+func CreateDecrypter(reader io.Reader) *Decrypter {
+	return &Decrypter{originalReader: reader}
 }
 
-func (me *Decrypter2) Armored(armored bool) *Decrypter2 {
+func (me *Decrypter) Armored(armored bool) *Decrypter {
 	me.armored = armored
 	return me
 }
 
-func (me *Decrypter2) Decrypt(recipients *KeyRing) *Decrypter2 {
+func (me *Decrypter) Decrypt(recipients *KeyRing) *Decrypter {
 	me.recipients = recipients
 	return me
 }
 
-func (me *Decrypter2) Signers(signers *KeyRing) *Decrypter2 {
+func (me *Decrypter) Signers(signers *KeyRing) *Decrypter {
 	me.signers = signers
 	return me
 }
 
-func (me *Decrypter2) Symmetric(key *SymKey) *Decrypter2 {
+func (me *Decrypter) Symmetric(key *SymKey) *Decrypter {
 	me.symKey = key
 	return me
 }
 
-func (me *Decrypter2) Start() io.Reader {
+func (me *Decrypter) Start() io.Reader {
 	util.Assert(me.originalReader == nil, "Reader is required")
 	util.Assert(me.symKey == nil && me.recipients == nil && me.signers == nil && !me.armored, "Nothing to do")
 	util.Assert(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
@@ -77,7 +77,7 @@ func (me *Decrypter2) Start() io.Reader {
 	return me.openTempFile()
 }
 
-func (me *Decrypter2) openTempFile() io.Reader {
+func (me *Decrypter) openTempFile() io.Reader {
 	ret, err := os.Open(me.tempFile)
 	util.Check(err)
 	me.tempFileReader = ret
@@ -85,7 +85,7 @@ func (me *Decrypter2) openTempFile() io.Reader {
 	return me.reader
 }
 
-func (me *Decrypter2) checkSign() {
+func (me *Decrypter) checkSign() {
 	if me.signers == nil {
 		return
 	}
@@ -101,7 +101,7 @@ func (me *Decrypter2) checkSign() {
 	log.Panicf("Decrypt, signer is not a writer: %s", sigKP.Id())
 }
 
-func (me *Decrypter2) openSymDecrypt() io.Reader {
+func (me *Decrypter) openSymDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(me.reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 		return me.symKey.key, nil
 	}, nil)
@@ -112,7 +112,7 @@ func (me *Decrypter2) openSymDecrypt() io.Reader {
 	return &decryptor2Reader{decrypter: me}
 }
 
-func (me *Decrypter2) preapreArmored() {
+func (me *Decrypter) preapreArmored() {
 	if !me.armored {
 		return
 	}
@@ -123,7 +123,7 @@ func (me *Decrypter2) preapreArmored() {
 	me.reader = block.Body
 }
 
-func (me *Decrypter2) unsafeDecrypt() {
+func (me *Decrypter) unsafeDecrypt() {
 	keys := KeyRingCreate().toPgpEntityList()
 	if me.signers != nil {
 		keys = append(keys, me.signers.toPgpEntityList()...)
@@ -136,7 +136,7 @@ func (me *Decrypter2) unsafeDecrypt() {
 	me.msg = msg
 }
 
-func (me *Decrypter2) decryptToTemp() {
+func (me *Decrypter) decryptToTemp() {
 	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)
 	defer f.Close()
@@ -150,14 +150,14 @@ func (me *Decrypter2) decryptToTemp() {
 }
 
 type decryptor2Reader struct {
-	decrypter *Decrypter2
+	decrypter *Decrypter
 }
 
 func (me *decryptor2Reader) Read(p []byte) (n int, err error) {
 	return me.decrypter.reader.Read(p)
 }
 
-func (me *Decrypter2) Close() error {
+func (me *Decrypter) Close() error {
 	if me.tempFileReader != nil {
 		log.Printf("Decrypter closing, closing temp file: %s", me.tempFile)
 		me.tempFileReader.Close()
