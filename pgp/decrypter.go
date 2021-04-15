@@ -41,7 +41,10 @@ func (me *Decrypter) Decrypt(recipients *KeyRing) *Decrypter {
 }
 
 func (me *Decrypter) Signers(signers *KeyRing) *Decrypter {
-	me.signers = signers
+	me.signers = nil
+	if signers != nil {
+		me.signers = signers.PubOnly()
+	}
 	return me
 }
 

@@ -29,7 +29,7 @@ func TestPocSequential(t *testing.T) {
 	}()
 
 	func() {
-		decrypter := CreateDecrypter(buf).Signers(KeyRingCreate(kp)).Decrypt(KeyRingCreate())
+		decrypter := CreateDecrypter(buf).Signers(KeyRingCreate(kp)).Decrypt(KeyRingCreate(kp))
 		defer decrypter.Close()
 		reader := decrypter.Start()
 		data, err := ioutil.ReadAll(reader)
