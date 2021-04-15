@@ -2,7 +2,9 @@ package pgp
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
@@ -16,9 +18,12 @@ type Decrypter2 struct {
 	writers        *KeyRing
 	symKey         *SymKey
 
-	armorBlock *armor.Block
-	reader     io.Reader
-	msg        *openpgp.MessageDetails
+	armorBlock     *armor.Block
+	reader         io.Reader
+	msg            *openpgp.MessageDetails
+	tempKey        *SymKey
+	tempFile       string
+	tempFileReader io.ReadCloser
 }
 
 type Decryptor2Reader struct {
@@ -30,6 +35,14 @@ func (me *Decryptor2Reader) Read(p []byte) (n int, err error) {
 }
 
 func (me *Decrypter2) Close() error {
+	if me.tempFileReader != nil {
+		log.Printf("Decrypter closing, closing temp file: %s", me.tempFile)
+		me.tempFileReader.Close()
+	}
+	if me.tempFile != "" {
+		log.Printf("Decrypter closing, deleting file: %s", me.tempFile)
+		os.Remove(me.tempFile)
+	}
 	return nil
 }
 
@@ -73,7 +86,38 @@ func (me *Decrypter2) Open() io.Reader {
 		return me.openSymDecrypt()
 	}
 
+	me.decryptToTemp()
+	me.checkSign()
+
+	if me.recipients == nil {
+		return me.openTempFile()
+	}
+
 	return nil
+}
+
+func (me *Decrypter2) openTempFile() io.Reader {
+	ret, err := os.Open(me.tempFile)
+	util.Check(err)
+	me.reader = ret
+	me.tempFileReader = ret
+	return me.reader
+}
+
+func (me *Decrypter2) checkSign() {
+	if me.writers == nil {
+		return
+	}
+	me.check(!me.msg.IsSigned, "Decrypt, msg is not signed")
+	me.check(me.msg.Signature == nil, "Decrypt, unknown signer: %X", me.msg.SignedByKeyId)
+	sigKP := keyFromEntity(me.msg.SignedBy.Entity)
+	pubKey := sigKP.ExportPub()
+	for _, v := range me.writers.kps {
+		if v.ExportPub() == pubKey {
+			return
+		}
+	}
+	log.Panicf("Decrypt, signer is not a writer: %s", sigKP.Id())
 }
 
 func (me *Decrypter2) openArmored() io.Reader {
@@ -92,9 +136,9 @@ func (me *Decrypter2) openSymDecrypt() io.Reader {
 	return &Decryptor2Reader{decrypter: me}
 }
 
-func (me *Decrypter2) check(cond bool, msg string) {
+func (me *Decrypter2) check(cond bool, msg string, v ...interface{}) {
 	if cond {
-		log.Panicf(msg)
+		log.Panicf(msg, v...)
 	}
 }
 
@@ -120,28 +164,18 @@ func (me *Decrypter2) unsafeDecrypt() {
 	msg, err := openpgp.ReadMessage(me.reader, keys, nil, nil)
 	util.Check(err)
 	me.msg = msg
-	me.reader = msg.UnverifiedBody
-	// if me.recipients != nil && !me.msg.IsEncrypted {
-	// 	log.Panicf("Decrypt, it is not encrypted")
-	// }
-	// if me.writers != nil && !me.msg.IsSigned {
-	// 	log.Panicf("Decrypt, it is not signed")
-	// }
-	// decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
-	// log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
-	// return me.msg.UnverifiedBody
 }
 
-// func (me *Decrypter2) decryptToTemp() {
-// unsafe := me.UnsafeDecrypt()
-// f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
-// util.Check(err)
-// defer f.Close()
-// me.tempKey = SymKeyGenerate()
-// encrypter := SymEncypterCreate(f, me.tempKey)
-// defer encrypter.Close()
-// total, err := io.Copy(encrypter.Encrypt(), unsafe)
-// util.Check(err)
-// log.Printf("Decrypt to %s, total: %d, verifyOnly: %t", f.Name(), total, me.verifyOnly)
-// me.tempFile = f.Name()
-// }
+func (me *Decrypter2) decryptToTemp() {
+	me.unsafeDecrypt()
+	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
+	util.Check(err)
+	defer f.Close()
+	me.tempKey = SymKeyGenerate()
+	encrypter := SymEncypterCreate(f, me.tempKey)
+	defer encrypter.Close()
+	total, err := io.Copy(encrypter.Encrypt(), me.msg.UnverifiedBody)
+	util.Check(err)
+	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
+	me.tempFile = f.Name()
+}
