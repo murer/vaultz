@@ -29,11 +29,8 @@ func SignerCreate(ciphered io.Writer, signer *KeyPair) *Signer {
 }
 
 func (me *Signer) Sign() io.WriteCloser {
-	// wa, err := armor.Encode(me.ciphered, "PGP MESSAGE", nil)
-	// util.Check(err)
 	writer, err := openpgp.Sign(me.ciphered, me.signer.pgpkey, nil, nil)
 	util.Check(err)
-	// me.armor = wa
 	me.writer = writer
 	log.Printf("Signer start, signer: %s %s", me.signer.Id(), me.signer.UserName())
 	return me
@@ -47,11 +44,7 @@ func (me *Signer) Write(p []byte) (n int, err error) {
 func (me *Signer) Close() error {
 	log.Printf("Signer done, size: %d", me.byteCount)
 	we := me.writer.Close()
-	// ae := me.armor.Close()
-	// if we != nil {
 	return we
-	// }
-	// return ae
 }
 
 func _signBytes(plain []byte, signer *KeyPair) *bytes.Buffer {
