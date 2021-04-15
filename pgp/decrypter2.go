@@ -30,7 +30,7 @@ func CreateDecrypter(reader io.Reader) *Decrypter2 {
 	return &Decrypter2{originalReader: reader}
 }
 
-func (me *Decrypter2) Armor(armored bool) *Decrypter2 {
+func (me *Decrypter2) Armored(armored bool) *Decrypter2 {
 	me.armored = armored
 	return me
 }

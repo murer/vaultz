@@ -17,7 +17,7 @@ func TestArmor(t *testing.T) {
 		defer encrypter.Close()
 		encrypter.Start().Write([]byte("mymsg"))
 	}()
-	decrypter := CreateDecrypter(strings.NewReader(buf.String())).Armor(true)
+	decrypter := CreateDecrypter(strings.NewReader(buf.String())).Armored(true)
 	defer decrypter.Close()
 	assert.Equal(t, "mymsg", string(util.ReadAll(decrypter.Start())))
 }
