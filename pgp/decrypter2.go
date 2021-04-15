@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/openpgp/armor"
 )
 
-type Dectypter2 struct {
+type Decrypter2 struct {
 	originalReader io.Reader
 	armored        bool
 	recipients     *KeyRing
@@ -22,42 +22,42 @@ type Dectypter2 struct {
 }
 
 type Decryptor2Reader struct {
-	decrypter *Dectypter2
+	decrypter *Decrypter2
 }
 
 func (me *Decryptor2Reader) Read(p []byte) (n int, err error) {
 	return me.decrypter.reader.Read(p)
 }
 
-func (me *Decryptor2Reader) Close() error {
+func (me *Decrypter2) Close() error {
 	return nil
 }
 
-func CreateDecrypter(reader io.Reader) *Dectypter2 {
-	return &Dectypter2{originalReader: reader}
+func CreateDecrypter(reader io.Reader) *Decrypter2 {
+	return &Decrypter2{originalReader: reader}
 }
 
-func (me *Dectypter2) Armor(armored bool) *Dectypter2 {
+func (me *Decrypter2) Armor(armored bool) *Decrypter2 {
 	me.armored = armored
 	return me
 }
 
-func (me *Dectypter2) Decrypt(recipients *KeyRing) *Dectypter2 {
+func (me *Decrypter2) Decrypt(recipients *KeyRing) *Decrypter2 {
 	me.recipients = recipients
 	return me
 }
 
-func (me *Dectypter2) Verify(writers *KeyRing) *Dectypter2 {
+func (me *Decrypter2) Verify(writers *KeyRing) *Decrypter2 {
 	me.writers = writers
 	return me
 }
 
-func (me *Dectypter2) Symmetric(key *SymKey) *Dectypter2 {
+func (me *Decrypter2) Symmetric(key *SymKey) *Decrypter2 {
 	me.symKey = key
 	return me
 }
 
-func (me *Dectypter2) Open() io.ReadCloser {
+func (me *Decrypter2) Open() io.Reader {
 	me.check(me.originalReader == nil, "Reader is required")
 	me.check(me.symKey == nil && me.recipients == nil && me.writers == nil && !me.armored, "Nothing to do")
 	me.check(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
@@ -69,7 +69,6 @@ func (me *Dectypter2) Open() io.ReadCloser {
 	if me.symKey == nil && me.recipients == nil && me.writers == nil {
 		return me.openArmored()
 	}
-
 	if me.symKey != nil {
 		return me.openSymDecrypt()
 	}
@@ -77,12 +76,12 @@ func (me *Dectypter2) Open() io.ReadCloser {
 	return nil
 }
 
-func (me *Dectypter2) openArmored() io.ReadCloser {
+func (me *Decrypter2) openArmored() io.Reader {
 	log.Printf("Decrypter, armor parsing only")
 	return &Decryptor2Reader{decrypter: me}
 }
 
-func (me *Dectypter2) openSymDecrypt() io.ReadCloser {
+func (me *Decrypter2) openSymDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(me.reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 		return me.symKey.key, nil
 	}, nil)
@@ -93,13 +92,13 @@ func (me *Dectypter2) openSymDecrypt() io.ReadCloser {
 	return &Decryptor2Reader{decrypter: me}
 }
 
-func (me *Dectypter2) check(cond bool, msg string) {
+func (me *Decrypter2) check(cond bool, msg string) {
 	if cond {
 		log.Panicf(msg)
 	}
 }
 
-func (me *Dectypter2) preapreArmored() {
+func (me *Decrypter2) preapreArmored() {
 	if !me.armored {
 		return
 	}
@@ -109,3 +108,40 @@ func (me *Dectypter2) preapreArmored() {
 	me.armorBlock = block
 	me.reader = block.Body
 }
+
+func (me *Decrypter2) unsafeDecrypt() {
+	keys := KeyRingCreate().toPgpEntityList()
+	if me.writers != nil {
+		keys = append(keys, me.writers.toPgpEntityList()...)
+	}
+	if me.recipients != nil {
+		keys = append(keys, me.recipients.toPgpEntityList()...)
+	}
+	msg, err := openpgp.ReadMessage(me.reader, keys, nil, nil)
+	util.Check(err)
+	me.msg = msg
+	me.reader = msg.UnverifiedBody
+	// if me.recipients != nil && !me.msg.IsEncrypted {
+	// 	log.Panicf("Decrypt, it is not encrypted")
+	// }
+	// if me.writers != nil && !me.msg.IsSigned {
+	// 	log.Panicf("Decrypt, it is not signed")
+	// }
+	// decKP := keyFromEntity(me.msg.DecryptedWith.Entity)
+	// log.Printf("Decrypt with: %s %s", decKP.Id(), decKP.UserName())
+	// return me.msg.UnverifiedBody
+}
+
+// func (me *Decrypter2) decryptToTemp() {
+// unsafe := me.UnsafeDecrypt()
+// f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
+// util.Check(err)
+// defer f.Close()
+// me.tempKey = SymKeyGenerate()
+// encrypter := SymEncypterCreate(f, me.tempKey)
+// defer encrypter.Close()
+// total, err := io.Copy(encrypter.Encrypt(), unsafe)
+// util.Check(err)
+// log.Printf("Decrypt to %s, total: %d, verifyOnly: %t", f.Name(), total, me.verifyOnly)
+// me.tempFile = f.Name()
+// }

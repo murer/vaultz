@@ -27,11 +27,11 @@ func TestSymKeyGen(t *testing.T) {
 	// defer decrypter.Close()
 	// assert.Equal(t, "mymsg", decrypter.DecryptString())
 
-	decrypter := CreateDecrypter(strings.NewReader(ciphered1)).Symmetric(k1).Open()
+	decrypter := CreateDecrypter(strings.NewReader(ciphered1))
 	defer decrypter.Close()
-	assert.Equal(t, "mymsg", util.ReadAllString(decrypter))
-	decrypter = CreateDecrypter(strings.NewReader(ciphered2)).Symmetric(k1).Open()
+	assert.Equal(t, "mymsg", util.ReadAllString(decrypter.Symmetric(k1).Open()))
+	decrypter = CreateDecrypter(strings.NewReader(ciphered2))
 	defer decrypter.Close()
-	assert.Equal(t, "mymsg", util.ReadAllString(decrypter))
+	assert.Equal(t, "mymsg", util.ReadAllString(decrypter.Symmetric(k1).Open()))
 
 }
