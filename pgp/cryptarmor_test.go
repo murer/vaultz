@@ -1,6 +1,7 @@
 package pgp
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 
@@ -10,10 +11,13 @@ import (
 
 func TestArmor(t *testing.T) {
 
-	armored := ArmorEncodeString("mymsg", "TEST ONLY")
-
-	decrypter := CreateDecrypter(strings.NewReader(armored))
+	buf := new(bytes.Buffer)
+	func() {
+		encrypter := CreateEncrypter(buf).Armored("TEST ONLY")
+		defer encrypter.Close()
+		encrypter.Start().Write([]byte("mymsg"))
+	}()
+	decrypter := CreateDecrypter(strings.NewReader(buf.String())).Armor(true)
 	defer decrypter.Close()
-	reader := decrypter.Armor(true).Start()
-	assert.Equal(t, "mymsg", string(util.ReadAll(reader)))
+	assert.Equal(t, "mymsg", string(util.ReadAll(decrypter.Start())))
 }

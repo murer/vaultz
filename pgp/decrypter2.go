@@ -60,7 +60,8 @@ func (me *Decrypter2) Start() io.Reader {
 	me.preapreArmored()
 
 	if me.symKey == nil && me.recipients == nil && me.signers == nil {
-		return me.openArmored()
+		log.Printf("Decrypter, armor parsing only")
+		return &decryptor2Reader{decrypter: me}
 	}
 	if me.symKey != nil {
 		return me.openSymDecrypt()
@@ -100,11 +101,6 @@ func (me *Decrypter2) checkSign() {
 	log.Panicf("Decrypt, signer is not a writer: %s", sigKP.Id())
 }
 
-func (me *Decrypter2) openArmored() io.Reader {
-	log.Printf("Decrypter, armor parsing only")
-	return &Decryptor2Reader{decrypter: me}
-}
-
 func (me *Decrypter2) openSymDecrypt() io.Reader {
 	msg, err := openpgp.ReadMessage(me.reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
 		return me.symKey.key, nil
@@ -113,15 +109,15 @@ func (me *Decrypter2) openSymDecrypt() io.Reader {
 	me.msg = msg
 	log.Printf("Decrypt, symmetric with key size: %d", me.symKey.Size())
 	me.reader = me.msg.UnverifiedBody
-	return &Decryptor2Reader{decrypter: me}
+	return &decryptor2Reader{decrypter: me}
 }
 
 func (me *Decrypter2) preapreArmored() {
 	if !me.armored {
 		return
 	}
-	log.Printf("Decrypter, Prepareing armor parsing")
-	block, err := armor.Decode(me.originalReader)
+	log.Printf("Decrypter, Prepering armor")
+	block, err := armor.Decode(me.reader)
 	util.Check(err)
 	me.armorBlock = block
 	me.reader = block.Body
@@ -153,11 +149,11 @@ func (me *Decrypter2) decryptToTemp() {
 	me.tempFile = f.Name()
 }
 
-type Decryptor2Reader struct {
+type decryptor2Reader struct {
 	decrypter *Decrypter2
 }
 
-func (me *Decryptor2Reader) Read(p []byte) (n int, err error) {
+func (me *decryptor2Reader) Read(p []byte) (n int, err error) {
 	return me.decrypter.reader.Read(p)
 }
 
