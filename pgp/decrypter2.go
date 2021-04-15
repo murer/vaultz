@@ -86,14 +86,14 @@ func (me *Decrypter2) Open() io.Reader {
 		return me.openSymDecrypt()
 	}
 
+	me.unsafeDecrypt()
+	me.check(me.recipients != nil && !me.msg.IsEncrypted, "Decrypt, it is not encrypted")
+	me.check(me.recipients != nil && !me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
+
 	me.decryptToTemp()
 	me.checkSign()
 
-	if me.recipients == nil {
-		return me.openTempFile()
-	}
-
-	return nil
+	return me.openTempFile()
 }
 
 func (me *Decrypter2) openTempFile() io.Reader {
@@ -167,7 +167,6 @@ func (me *Decrypter2) unsafeDecrypt() {
 }
 
 func (me *Decrypter2) decryptToTemp() {
-	me.unsafeDecrypt()
 	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)
 	defer f.Close()
