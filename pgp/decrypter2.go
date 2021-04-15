@@ -15,7 +15,7 @@ type Decrypter2 struct {
 	originalReader io.Reader
 	armored        bool
 	recipients     *KeyRing
-	writers        *KeyRing
+	signers        *KeyRing
 	symKey         *SymKey
 
 	armorBlock     *armor.Block
@@ -40,8 +40,8 @@ func (me *Decrypter2) Decrypt(recipients *KeyRing) *Decrypter2 {
 	return me
 }
 
-func (me *Decrypter2) Verify(writers *KeyRing) *Decrypter2 {
-	me.writers = writers
+func (me *Decrypter2) Signers(signers *KeyRing) *Decrypter2 {
+	me.signers = signers
 	return me
 }
 
@@ -52,14 +52,14 @@ func (me *Decrypter2) Symmetric(key *SymKey) *Decrypter2 {
 
 func (me *Decrypter2) Start() io.Reader {
 	me.check(me.originalReader == nil, "Reader is required")
-	me.check(me.symKey == nil && me.recipients == nil && me.writers == nil && !me.armored, "Nothing to do")
+	me.check(me.symKey == nil && me.recipients == nil && me.signers == nil && !me.armored, "Nothing to do")
 	me.check(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
-	me.check(me.symKey != nil && me.writers != nil, "Symmetric decryption can not have writers")
+	me.check(me.symKey != nil && me.signers != nil, "Symmetric decryption can not have signers")
 
 	me.reader = me.originalReader
 	me.preapreArmored()
 
-	if me.symKey == nil && me.recipients == nil && me.writers == nil {
+	if me.symKey == nil && me.recipients == nil && me.signers == nil {
 		return me.openArmored()
 	}
 	if me.symKey != nil {
@@ -85,14 +85,14 @@ func (me *Decrypter2) openTempFile() io.Reader {
 }
 
 func (me *Decrypter2) checkSign() {
-	if me.writers == nil {
+	if me.signers == nil {
 		return
 	}
 	me.check(!me.msg.IsSigned, "Decrypt, msg is not signed")
 	me.check(me.msg.Signature == nil, "Decrypt, unknown signer: %X", me.msg.SignedByKeyId)
 	sigKP := keyFromEntity(me.msg.SignedBy.Entity)
 	pubKey := sigKP.ExportPub()
-	for _, v := range me.writers.kps {
+	for _, v := range me.signers.kps {
 		if v.ExportPub() == pubKey {
 			return
 		}
@@ -135,8 +135,8 @@ func (me *Decrypter2) preapreArmored() {
 
 func (me *Decrypter2) unsafeDecrypt() {
 	keys := KeyRingCreate().toPgpEntityList()
-	if me.writers != nil {
-		keys = append(keys, me.writers.toPgpEntityList()...)
+	if me.signers != nil {
+		keys = append(keys, me.signers.toPgpEntityList()...)
 	}
 	if me.recipients != nil {
 		keys = append(keys, me.recipients.toPgpEntityList()...)
