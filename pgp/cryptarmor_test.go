@@ -14,6 +14,6 @@ func TestArmor(t *testing.T) {
 
 	decrypter := CreateDecrypter(strings.NewReader(armored))
 	defer decrypter.Close()
-	reader := decrypter.Armor(true).Open()
+	reader := decrypter.Armor(true).Start()
 	assert.Equal(t, "mymsg", string(util.ReadAll(reader)))
 }

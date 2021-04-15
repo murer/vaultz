@@ -70,7 +70,7 @@ func (me *Decrypter2) Symmetric(key *SymKey) *Decrypter2 {
 	return me
 }
 
-func (me *Decrypter2) Open() io.Reader {
+func (me *Decrypter2) Start() io.Reader {
 	me.check(me.originalReader == nil, "Reader is required")
 	me.check(me.symKey == nil && me.recipients == nil && me.writers == nil && !me.armored, "Nothing to do")
 	me.check(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
@@ -88,7 +88,7 @@ func (me *Decrypter2) Open() io.Reader {
 
 	me.unsafeDecrypt()
 	me.check(me.recipients != nil && !me.msg.IsEncrypted, "Decrypt, it is not encrypted")
-	me.check(me.recipients != nil && !me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
+	me.check(me.recipients != nil && me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
 
 	me.decryptToTemp()
 	me.checkSign()
@@ -99,8 +99,8 @@ func (me *Decrypter2) Open() io.Reader {
 func (me *Decrypter2) openTempFile() io.Reader {
 	ret, err := os.Open(me.tempFile)
 	util.Check(err)
-	me.reader = ret
 	me.tempFileReader = ret
+	me.reader = CreateDecrypter(ret).Symmetric(me.tempKey).Start()
 	return me.reader
 }
 
