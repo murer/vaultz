@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/murer/vaultz/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,10 +20,18 @@ func TestSymKeyGen(t *testing.T) {
 
 	assert.NotEqual(t, ciphered1, ciphered2)
 
-	decrypter := SymDecrypterCreate(strings.NewReader(ciphered1), k1)
+	// decrypter := SymDecrypterCreate(strings.NewReader(ciphered1), k1)
+	// defer decrypter.Close()
+	// assert.Equal(t, "mymsg", decrypter.DecryptString())
+	// decrypter = SymDecrypterCreate(strings.NewReader(ciphered2), k1)
+	// defer decrypter.Close()
+	// assert.Equal(t, "mymsg", decrypter.DecryptString())
+
+	decrypter := CreateDecrypter(strings.NewReader(ciphered1)).Symmetric(k1).Open()
 	defer decrypter.Close()
-	assert.Equal(t, "mymsg", decrypter.DecryptString())
-	decrypter = SymDecrypterCreate(strings.NewReader(ciphered2), k1)
+	assert.Equal(t, "mymsg", util.ReadAllString(decrypter))
+	decrypter = CreateDecrypter(strings.NewReader(ciphered2)).Symmetric(k1).Open()
 	defer decrypter.Close()
-	assert.Equal(t, "mymsg", decrypter.DecryptString())
+	assert.Equal(t, "mymsg", util.ReadAllString(decrypter))
+
 }

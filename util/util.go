@@ -16,3 +16,7 @@ func ReadAll(r io.Reader) []byte {
 	Check(err)
 	return ret
 }
+
+func ReadAllString(r io.Reader) string {
+	return string(ReadAll(r))
+}

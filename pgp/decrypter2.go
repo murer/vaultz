@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/murer/vaultz/util"
+	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )
 
@@ -13,10 +14,11 @@ type Dectypter2 struct {
 	armored        bool
 	recipients     *KeyRing
 	writers        *KeyRing
-	SymKey         *SymKey
+	symKey         *SymKey
 
 	armorBlock *armor.Block
 	reader     io.Reader
+	msg        *openpgp.MessageDetails
 }
 
 type Decryptor2Reader struct {
@@ -51,23 +53,24 @@ func (me *Dectypter2) Verify(writers *KeyRing) *Dectypter2 {
 }
 
 func (me *Dectypter2) Symmetric(key *SymKey) *Dectypter2 {
-	me.SymKey = key
+	me.symKey = key
 	return me
 }
 
 func (me *Dectypter2) Open() io.ReadCloser {
 	me.check(me.originalReader == nil, "Reader is required")
-	me.check(me.SymKey == nil && me.recipients == nil && me.writers == nil && !me.armored, "Nothing to do")
-	me.check(me.SymKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
-	me.check(me.SymKey != nil && me.writers != nil, "Symmetric decryption can not have writers")
+	me.check(me.symKey == nil && me.recipients == nil && me.writers == nil && !me.armored, "Nothing to do")
+	me.check(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
+	me.check(me.symKey != nil && me.writers != nil, "Symmetric decryption can not have writers")
 
 	me.reader = me.originalReader
 	me.preapreArmored()
-	if me.SymKey == nil && me.recipients == nil && me.writers == nil {
+
+	if me.symKey == nil && me.recipients == nil && me.writers == nil {
 		return me.openArmored()
 	}
 
-	if me.SymKey != nil {
+	if me.symKey != nil {
 		return me.openSymDecrypt()
 	}
 
@@ -80,7 +83,14 @@ func (me *Dectypter2) openArmored() io.ReadCloser {
 }
 
 func (me *Dectypter2) openSymDecrypt() io.ReadCloser {
-	return nil
+	msg, err := openpgp.ReadMessage(me.reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
+		return me.symKey.key, nil
+	}, nil)
+	util.Check(err)
+	me.msg = msg
+	log.Printf("Decrypt, symmetric with key size: %d", me.symKey.Size())
+	me.reader = me.msg.UnverifiedBody
+	return &Decryptor2Reader{decrypter: me}
 }
 
 func (me *Dectypter2) check(cond bool, msg string) {
