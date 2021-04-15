@@ -78,7 +78,14 @@ func _encryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) *bytes.Bu
 }
 
 func EncryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) []byte {
-	return _encryptBytes(plain, signer, recipients).Bytes()
+	//return _encryptBytes(plain, signer, recipients).Bytes()
+	buf := new(bytes.Buffer)
+	func() {
+		encrypter := CreateEncrypter(buf).Sign(signer).Encrypt(recipients)
+		defer encrypter.Close()
+		encrypter.Start().Write(plain)
+	}()
+	return buf.Bytes()
 }
 
 func EncryptString(plain string, signer *KeyPair, ring *KeyRing) []byte {
