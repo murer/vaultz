@@ -70,6 +70,10 @@ func (me *KeyPair) Id() string {
 	return me.pgpkey.PrimaryKey.KeyIdString()
 }
 
+func (me *KeyPair) IdBinary() uint64 {
+	return me.pgpkey.PrimaryKey.KeyId
+}
+
 func (me *KeyPair) UserName() string {
 	for _, k := range me.pgpkey.Identities {
 		return k.UserId.Name

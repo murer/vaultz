@@ -18,6 +18,7 @@ func TestKeyGen(t *testing.T) {
 	assert.NotEmpty(t, kp.ExportPrivArmored())
 	assert.Regexp(t, "-----END PGP PRIVATE KEY BLOCK-----$", kp.ExportPrivArmored())
 	assert.NotEmpty(t, kp.Id())
+	assert.Equal(t, 16, len(kp.Id()))
 
 	fmt.Printf("id: %s\n", kp.Id())
 
