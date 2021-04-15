@@ -57,3 +57,17 @@ func ArmorDecodeBytes(data string, blockType string) []byte {
 func ArmorDecodeString(data string, blockType string) string {
 	return string(ArmorDecodeBytes(data, blockType))
 }
+
+func SignBytes(plain []byte, signer *KeyPair) string {
+	buf := new(bytes.Buffer)
+	func() {
+		enc := CreateEncrypter(buf).Sign(signer)
+		defer enc.Close()
+		enc.Start().Write(plain)
+	}()
+	return buf.String()
+}
+
+func SignString(plain string, signer *KeyPair) string {
+	return SignBytes([]byte(plain), signer)
+}

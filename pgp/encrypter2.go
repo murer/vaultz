@@ -21,6 +21,7 @@ type Encrypter2 struct {
 	armoredWriter io.WriteCloser
 	symWriter     io.WriteCloser
 	encryptWriter io.WriteCloser
+	signerWriter  io.WriteCloser
 }
 
 func CreateEncrypter(writer io.Writer) *Encrypter2 {
@@ -63,6 +64,9 @@ func (me *Encrypter2) Start() io.Writer {
 	if me.symKey != nil {
 		return me.openSymEncrypt()
 	}
+	if me.recipients == nil {
+		return me.openSigner()
+	}
 
 	return me.openEncrypt()
 }
@@ -72,6 +76,17 @@ func (me *Encrypter2) getSignerKey() *openpgp.Entity {
 		return nil
 	}
 	return me.signer.pgpkey
+}
+
+func (me *Encrypter2) openSigner() io.Writer {
+	signerWriter, err := openpgp.Sign(me.writer, me.getSignerKey(), nil, nil)
+	util.Check(err)
+	me.signerWriter = signerWriter
+	if me.getSignerKey() != nil {
+		log.Printf("Encrypt, signer only: %s %s", me.signer.Id(), me.signer.UserName())
+	}
+	me.writer = signerWriter
+	return signerWriter
 }
 
 func (me *Encrypter2) openEncrypt() io.Writer {
@@ -125,6 +140,10 @@ func (me *Encrypter2) Close() error {
 	if me.encryptWriter != nil {
 		log.Printf("Encrypter, closing encrypt writer writer")
 		me.encryptWriter.Close()
+	}
+	if me.signerWriter != nil {
+		log.Printf("Encrypter, closing encrypt writer writer")
+		me.signerWriter.Close()
 	}
 	if me.symWriter != nil {
 		log.Printf("Encrypter, closing symmetric writer writer")
