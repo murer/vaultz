@@ -34,7 +34,7 @@ func (me *Encrypter) Armored(blockType string) *Encrypter {
 }
 
 func (me *Encrypter) Encrypt(recipients *KeyRing) *Encrypter {
-	me.recipients = recipients.PubOnly()
+	me.recipients = recipients
 	return me
 }
 
