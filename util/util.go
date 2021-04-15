@@ -3,11 +3,18 @@ package util
 import (
 	"io"
 	"io/ioutil"
+	"log"
 )
 
 func Check(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func Assert(cond bool, msg string, v ...interface{}) {
+	if cond {
+		log.Panicf(msg, v...)
 	}
 }
 

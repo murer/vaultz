@@ -51,10 +51,10 @@ func (me *Decrypter2) Symmetric(key *SymKey) *Decrypter2 {
 }
 
 func (me *Decrypter2) Start() io.Reader {
-	me.check(me.originalReader == nil, "Reader is required")
-	me.check(me.symKey == nil && me.recipients == nil && me.signers == nil && !me.armored, "Nothing to do")
-	me.check(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
-	me.check(me.symKey != nil && me.signers != nil, "Symmetric decryption can not have signers")
+	util.Assert(me.originalReader == nil, "Reader is required")
+	util.Assert(me.symKey == nil && me.recipients == nil && me.signers == nil && !me.armored, "Nothing to do")
+	util.Assert(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
+	util.Assert(me.symKey != nil && me.signers != nil, "Symmetric decryption can not have signers")
 
 	me.reader = me.originalReader
 	me.preapreArmored()
@@ -67,8 +67,8 @@ func (me *Decrypter2) Start() io.Reader {
 	}
 
 	me.unsafeDecrypt()
-	me.check(me.recipients != nil && !me.msg.IsEncrypted, "Decrypt, it is not encrypted")
-	me.check(me.recipients != nil && me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
+	util.Assert(me.recipients != nil && !me.msg.IsEncrypted, "Decrypt, it is not encrypted")
+	util.Assert(me.recipients != nil && me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
 
 	me.decryptToTemp()
 	me.checkSign()
@@ -88,8 +88,8 @@ func (me *Decrypter2) checkSign() {
 	if me.signers == nil {
 		return
 	}
-	me.check(!me.msg.IsSigned, "Decrypt, msg is not signed")
-	me.check(me.msg.Signature == nil, "Decrypt, unknown signer: %X", me.msg.SignedByKeyId)
+	util.Assert(!me.msg.IsSigned, "Decrypt, msg is not signed")
+	util.Assert(me.msg.Signature == nil, "Decrypt, unknown signer: %X", me.msg.SignedByKeyId)
 	sigKP := keyFromEntity(me.msg.SignedBy.Entity)
 	pubKey := sigKP.ExportPub()
 	for _, v := range me.signers.kps {
@@ -114,12 +114,6 @@ func (me *Decrypter2) openSymDecrypt() io.Reader {
 	log.Printf("Decrypt, symmetric with key size: %d", me.symKey.Size())
 	me.reader = me.msg.UnverifiedBody
 	return &Decryptor2Reader{decrypter: me}
-}
-
-func (me *Decrypter2) check(cond bool, msg string, v ...interface{}) {
-	if cond {
-		log.Panicf(msg, v...)
-	}
 }
 
 func (me *Decrypter2) preapreArmored() {
