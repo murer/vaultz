@@ -51,8 +51,9 @@ func (me *KeyRing) Get(id uint64) *KeyPair {
 
 func (me *KeyRing) _add(kp *KeyPair) {
 	id := kp.Id()
-	if me.kps[id] != nil {
-		log.Panicf("KeyId collision in the ring: %X", id)
+	old := me.kps[id]
+	if old != nil {
+		log.Panicf("KeyId: %016X collision in the ring, old: %s, new: %s", id, old.UserName(), kp.UserName())
 	}
 	me.kps[id] = kp
 }

@@ -74,9 +74,12 @@ func (me *Decrypter) Start() io.Reader {
 	util.Assert(me.recipients != nil && !me.msg.IsEncrypted, "Decrypt, it is not encrypted")
 	util.Assert(me.recipients != nil && me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
 
+	if me.signers == nil {
+		return me.reader
+	}
+
 	me.decryptToTemp()
 	me.checkSign()
-
 	return me.openTempFile()
 }
 
@@ -137,6 +140,7 @@ func (me *Decrypter) unsafeDecrypt() {
 	msg, err := openpgp.ReadMessage(me.reader, keys, nil, nil)
 	util.Check(err)
 	me.msg = msg
+	me.reader = msg.UnverifiedBody
 }
 
 func (me *Decrypter) decryptToTemp() {
@@ -146,7 +150,7 @@ func (me *Decrypter) decryptToTemp() {
 	me.tempKey = SymKeyGenerate()
 	encrypter := CreateEncrypter(f).Symmetric(me.tempKey)
 	defer encrypter.Close()
-	total, err := io.Copy(encrypter.Start(), me.msg.UnverifiedBody)
+	total, err := io.Copy(encrypter.Start(), me.reader)
 	util.Check(err)
 	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
 	me.tempFile = f.Name()
