@@ -3,26 +3,31 @@
 ```yaml
 file:
 
-- header: 
-    - encrypt: none
-    - data: |
-        xxxxx
+- signed: author
+- encrypt: none
+- obj:
 
-- pins:
+    - header: 
+        - amount: 1
+        - encrypt: none
+        - obj:
+            - keyHash: Salted hash of final key
+            - recipients: Number of recipients
+            - lock: Lock size
 
-    - comment: pins must be sorted by KeyId
+    - Pins:
+        - amount: header.obj.recipients
+        - encrypt: to the recipient
+        - obj: recipient pin
 
-    - pin1:
-        - encrypt: user 1 public key
-        - data: generated pin 1
+    - Locks:
+        - amount: combination (header.obj.recipients, header.obj.lock)
+        - encrypt: none
+        - obj: pgp sym enc, key = (pins[a].obj + pins[b].obj + pins[c].obj), plain = final key
 
-    - pin2:
-        - encrypt: user 2 public key
-        - data: generated pin 2
-    
-    - pinN:
-        - encrypt: user N public key
-        - data: generated pin 3
-
+    - Payload:
+        - amount: 1
+        - encrypt: symmetric with final key
+        - obj: payload
 
 ```
