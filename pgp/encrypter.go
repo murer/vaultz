@@ -7,7 +7,6 @@ import (
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
-	"golang.org/x/crypto/openpgp/packet"
 )
 
 type Encrypter struct {
@@ -106,10 +105,7 @@ func (me *Encrypter) openEncrypt() io.Writer {
 }
 
 func (me *Encrypter) openSymEncrypt() io.Writer {
-	packetConfig := &packet.Config{
-		DefaultCipher: packet.CipherAES256,
-	}
-	symWriter, err := openpgp.SymmetricallyEncrypt(me.writer, me.symKey.key, nil, packetConfig)
+	symWriter, err := openpgp.SymmetricallyEncrypt(me.writer, me.symKey.key, nil, Config)
 	util.Check(err)
 	me.symWriter = symWriter
 	log.Printf("Encrypt, symmetric with key size: %d", me.symKey.Size())
