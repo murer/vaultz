@@ -10,7 +10,7 @@ import (
 func EncryptBytes(plain []byte, signer *KeyPair, recipients *KeyRing) []byte {
 	buf := new(bytes.Buffer)
 	func() {
-		encrypter := CreateEncrypter(buf).Sign(signer).Encrypt(recipients)
+		encrypter := CreateEncrypter(buf).Sign(signer).Recipients(recipients)
 		defer encrypter.Close()
 		encrypter.Start().Write(plain)
 	}()
@@ -32,7 +32,7 @@ func DecryptString(ciphered []byte, signers *KeyRing, recipients *KeyRing) strin
 }
 
 func TryToDecryptBytes(ciphered []byte, signers *KeyRing, recipients *KeyRing) ([]byte, error) {
-	dec := CreateDecrypter(bytes.NewBuffer(ciphered)).Signers(signers).Decrypt(recipients)
+	dec := CreateDecrypter(bytes.NewBuffer(ciphered)).Signers(signers).Recipients(recipients)
 	defer dec.Close()
 	r, err := dec.TryToStart()
 	if err != nil {

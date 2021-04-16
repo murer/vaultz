@@ -32,7 +32,7 @@ func (me *Encrypter) Armored(blockType string) *Encrypter {
 	return me
 }
 
-func (me *Encrypter) Encrypt(recipients *KeyRing) *Encrypter {
+func (me *Encrypter) Recipients(recipients *KeyRing) *Encrypter {
 	me.recipients = recipients.PubOnly()
 	return me
 }

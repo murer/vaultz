@@ -43,7 +43,7 @@ func (me *Decrypter) Armored(armored bool) *Decrypter {
 	return me
 }
 
-func (me *Decrypter) Decrypt(recipients *KeyRing) *Decrypter {
+func (me *Decrypter) Recipients(recipients *KeyRing) *Decrypter {
 	me.recipients = recipients
 	return me
 }

@@ -15,7 +15,7 @@ func TestPocSequential(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	func() {
-		encrypter := CreateEncrypter(buf).Sign(kp).Encrypt(KeyRingCreate(kp))
+		encrypter := CreateEncrypter(buf).Sign(kp).Recipients(KeyRingCreate(kp))
 		defer encrypter.Close()
 		writer := encrypter.Start()
 		writer.Write([]byte("first"))
@@ -29,7 +29,7 @@ func TestPocSequential(t *testing.T) {
 	}()
 
 	func() {
-		decrypter := CreateDecrypter(buf).Signers(KeyRingCreate(kp)).Decrypt(KeyRingCreate(kp))
+		decrypter := CreateDecrypter(buf).Signers(KeyRingCreate(kp)).Recipients(KeyRingCreate(kp))
 		defer decrypter.Close()
 		reader := decrypter.Start()
 		data, err := ioutil.ReadAll(reader)
