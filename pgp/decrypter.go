@@ -104,7 +104,7 @@ func (me *Decrypter) checkSign() {
 			return
 		}
 	}
-	log.Panicf("Decrypt, signer is not a writer: %X", sigKP.Id())
+	log.Panicf("Decrypt, signer is not a writer: %X %s", sigKP.Id(), sigKP.UserEmail())
 }
 
 func (me *Decrypter) openSymDecrypt() io.Reader {
