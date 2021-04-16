@@ -21,6 +21,16 @@ func EncryptString(plain string, signer *KeyPair, ring *KeyRing) []byte {
 	return EncryptBytes([]byte(plain), signer, ring)
 }
 
+func DecryptBytes(ciphered []byte, signers *KeyRing, recipients *KeyRing) []byte {
+	dec := CreateDecrypter(bytes.NewBuffer(ciphered)).Signers(signers).Decrypt(recipients)
+	defer dec.Close()
+	return util.ReadAll(dec.Start())
+}
+
+func DecryptString(ciphered []byte, signers *KeyRing, recipients *KeyRing) string {
+	return string(DecryptBytes(ciphered, signers, recipients))
+}
+
 func SymEncryptBytes(plain []byte, key *SymKey) []byte {
 	buf := new(bytes.Buffer)
 	func() {
