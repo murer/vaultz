@@ -17,7 +17,7 @@ func KeyGenerate(name string, email string) *KeyPair {
 	pgpkey, err := openpgp.NewEntity(name, name, email, Config)
 	util.Check(err)
 	ret := &KeyPair{pgpkey: pgpkey}
-	log.Printf("KeyGenerate: %s %s", ret.Id(), ret.UserName())
+	log.Printf("KeyGenerate: %X %s", ret.Id(), ret.UserName())
 	return ret
 }
 
@@ -66,11 +66,11 @@ func (me *KeyPair) ExportPrivArmored() string {
 	return ArmorEncodeBytes([]byte(me.ExportPrivBinary()), openpgp.PrivateKeyType)
 }
 
-func (me *KeyPair) Id() string {
+func (me *KeyPair) IdString() string {
 	return me.pgpkey.PrimaryKey.KeyIdString()
 }
 
-func (me *KeyPair) IdBinary() uint64 {
+func (me *KeyPair) Id() uint64 {
 	return me.pgpkey.PrimaryKey.KeyId
 }
 

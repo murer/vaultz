@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -33,4 +34,8 @@ func ReadAll(r io.Reader) []byte {
 
 func ReadAllString(r io.Reader) string {
 	return string(ReadAll(r))
+}
+
+func HexUInt64(n uint64) string {
+	return fmt.Sprintf("%016X", n)
 }

@@ -23,7 +23,7 @@ func (me *KeyRing) IdString() []string {
 	ret := make([]string, me.Size())
 	i := 0
 	for _, v := range me.kps {
-		ret[i] = v.Id()
+		ret[i] = v.IdString()
 		i = i + 1
 	}
 	sort.Strings(ret)
@@ -34,7 +34,7 @@ func (me *KeyRing) Ids() []uint64 {
 	ret := make([]uint64, me.Size())
 	i := 0
 	for _, v := range me.kps {
-		ret[i] = v.IdBinary()
+		ret[i] = v.Id()
 		i = i + 1
 	}
 	sort.Slice(ret, func(a int, b int) bool { return ret[a] < ret[b] })
@@ -50,7 +50,7 @@ func (me *KeyRing) Get(id uint64) *KeyPair {
 }
 
 func (me *KeyRing) _add(kp *KeyPair) {
-	id := kp.IdBinary()
+	id := kp.Id()
 	if me.kps[id] != nil {
 		log.Panicf("KeyId collision in the ring: %X", id)
 	}

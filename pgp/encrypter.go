@@ -83,7 +83,7 @@ func (me *Encrypter) openSigner() io.Writer {
 	util.Check(err)
 	me.signerWriter = signerWriter
 	if me.getSignerKey() != nil {
-		log.Printf("Encrypt, signer only: %s %s", me.signer.Id(), me.signer.UserName())
+		log.Printf("Encrypt, signer only: %X %s", me.signer.Id(), me.signer.UserName())
 	}
 	me.writer = signerWriter
 	return signerWriter
@@ -94,12 +94,12 @@ func (me *Encrypter) openEncrypt() io.Writer {
 	util.Check(err)
 	me.encryptWriter = encryptWriter
 	if me.getSignerKey() != nil {
-		log.Printf("Encrypt, signer: %s %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
+		log.Printf("Encrypt, signer: %X %s, total recipients: %d", me.signer.Id(), me.signer.UserName(), len(me.recipients.kps))
 	} else {
 		log.Printf("Encrypt, no signer, total recipients: %d", len(me.recipients.kps))
 	}
 	for _, v := range me.recipients.kps {
-		log.Printf("Encrypt, recipients: %s %s", v.Id(), v.UserName())
+		log.Printf("Encrypt, recipients: %X %s", v.Id(), v.UserName())
 	}
 	me.writer = encryptWriter
 	return encryptWriter

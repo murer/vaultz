@@ -18,9 +18,9 @@ func TestKeyGen(t *testing.T) {
 	assert.NotEmpty(t, kp.ExportPrivArmored())
 	assert.Regexp(t, "-----END PGP PRIVATE KEY BLOCK-----$", kp.ExportPrivArmored())
 	assert.NotEmpty(t, kp.Id())
-	assert.Equal(t, 16, len(kp.Id()))
+	assert.Equal(t, 16, len(kp.IdString()))
 
-	fmt.Printf("id: %s\n", kp.Id())
+	assert.Equal(t, fmt.Sprintf("%016X", kp.Id()), kp.IdString())
 
 	pubkp := KeyImport(kp.ExportPubArmored())
 	assert.Equal(t, "test", pubkp.UserName())
@@ -28,7 +28,7 @@ func TestKeyGen(t *testing.T) {
 	assert.Equal(t, kp.ExportPubArmored(), pubkp.ExportPubArmored())
 	assert.Empty(t, pubkp.ExportPrivArmored())
 	assert.Equal(t, kp.Id(), pubkp.Id())
-	fmt.Printf("id: %s\n", kp.Id())
+	fmt.Printf("id: %X\n", kp.Id())
 
 	privkp := KeyImport(kp.ExportPrivArmored())
 	assert.Equal(t, "test", privkp.UserName())
@@ -36,6 +36,6 @@ func TestKeyGen(t *testing.T) {
 	assert.Equal(t, kp.ExportPubArmored(), privkp.ExportPubArmored())
 	assert.NotEmpty(t, privkp.ExportPrivArmored())
 	assert.Equal(t, kp.Id(), privkp.Id())
-	fmt.Printf("id: %s\n", privkp.Id())
+	fmt.Printf("id: %X\n", privkp.Id())
 
 }
