@@ -10,6 +10,7 @@ import (
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
+	"golang.org/x/crypto/openpgp/errors"
 )
 
 type Decrypter struct {
@@ -60,7 +61,7 @@ func (me *Decrypter) Symmetric(key *SymKey) *Decrypter {
 	return me
 }
 
-func (me *Decrypter) Start() io.Reader {
+func (me *Decrypter) TryToStart() (io.Reader, error) {
 	util.Assert(me.originalReader == nil, "Reader is required")
 	util.Assert(me.symKey == nil && me.recipients == nil && me.signers == nil && !me.armored, "Nothing to do")
 	util.Assert(me.symKey != nil && me.recipients != nil, "Symmetric decryption can not have recipients")
@@ -71,23 +72,32 @@ func (me *Decrypter) Start() io.Reader {
 
 	if me.symKey == nil && me.recipients == nil && me.signers == nil {
 		log.Printf("Decrypter, armor parsing only")
-		return &decryptor2Reader{decrypter: me}
+		return &decryptor2Reader{decrypter: me}, nil
 	}
 	if me.symKey != nil {
-		return me.openSymDecrypt()
+		return me.openSymDecrypt(), nil
 	}
 
-	me.unsafeDecrypt()
+	err := me.unsafeDecrypt()
+	if err != nil {
+		return nil, err
+	}
 	util.Assert(me.recipients != nil && !me.msg.IsEncrypted, "Decrypt, it is not encrypted")
 	util.Assert(me.recipients != nil && me.msg.IsSymmetricallyEncrypted, "Decrypt, it is symmetrically encrypted")
 
 	if me.signers == nil {
-		return me.reader
+		return me.reader, nil
 	}
 
 	me.decryptToTemp()
 	me.checkSign()
-	return me.openTemp()
+	return me.openTemp(), nil
+}
+
+func (me *Decrypter) Start() io.Reader {
+	ret, err := me.TryToStart()
+	util.Check(err)
+	return ret
 }
 
 func (me *Decrypter) openTemp() io.Reader {
@@ -139,7 +149,7 @@ func (me *Decrypter) preapreArmored() {
 	me.reader = block.Body
 }
 
-func (me *Decrypter) unsafeDecrypt() {
+func (me *Decrypter) unsafeDecrypt() error {
 	keys := KeyRingCreate().toPgpEntityList()
 	if me.signers != nil {
 		keys = append(keys, me.signers.toPgpEntityList()...)
@@ -148,9 +158,13 @@ func (me *Decrypter) unsafeDecrypt() {
 		keys = append(keys, me.recipients.toPgpEntityList()...)
 	}
 	msg, err := openpgp.ReadMessage(me.reader, keys, nil, nil)
+	if err == errors.ErrKeyIncorrect {
+		return ErrKeyIncorrect
+	}
 	util.Check(err)
 	me.msg = msg
 	me.reader = msg.UnverifiedBody
+	return nil
 }
 
 func (me *Decrypter) decryptToTempMemory() []byte {

@@ -22,13 +22,31 @@ func EncryptString(plain string, signer *KeyPair, ring *KeyRing) []byte {
 }
 
 func DecryptBytes(ciphered []byte, signers *KeyRing, recipients *KeyRing) []byte {
-	dec := CreateDecrypter(bytes.NewBuffer(ciphered)).Signers(signers).Decrypt(recipients)
-	defer dec.Close()
-	return util.ReadAll(dec.Start())
+	ret, err := TryToDecryptBytes(ciphered, signers, recipients)
+	util.Check(err)
+	return ret
 }
 
 func DecryptString(ciphered []byte, signers *KeyRing, recipients *KeyRing) string {
 	return string(DecryptBytes(ciphered, signers, recipients))
+}
+
+func TryToDecryptBytes(ciphered []byte, signers *KeyRing, recipients *KeyRing) ([]byte, error) {
+	dec := CreateDecrypter(bytes.NewBuffer(ciphered)).Signers(signers).Decrypt(recipients)
+	defer dec.Close()
+	r, err := dec.TryToStart()
+	if err != nil {
+		return nil, err
+	}
+	return util.ReadAll(r), nil
+}
+
+func TryToDecryptString(ciphered []byte, signers *KeyRing, recipients *KeyRing) (string, error) {
+	data, err := TryToDecryptBytes(ciphered, signers, recipients)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
 func SymEncryptBytes(plain []byte, key *SymKey) []byte {

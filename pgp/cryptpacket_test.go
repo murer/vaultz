@@ -24,21 +24,16 @@ func TestPacketDesc(t *testing.T) {
 	ciphered := EncryptString("mymsg", maria, recipients)
 	assert.Equal(t, "mymsg", DecryptString(ciphered, KeyRingCreate(maria), recipients))
 
-	// pkts := packet.NewReader(bytes.NewBuffer(ciphered))
-	// for {
-	// 	pkt, err := pkts.Next()
-	// 	util.Check(err)
-	// 	switch p := pkt.(type) {
-	// 	case *packet.EncryptedKey:
-	// 		log.Printf("EncryptedKey: %#v\n\n", p)
-	// 		log.Printf("xxx: %X", p.KeyId)
-	// 		abc := recipients.toPgpEntityList().KeysById(p.KeyId)
-	// 		for i, kkk := range abc {
-	// 			log.Printf("KKK: %d = '%#v'", i, kkk)
-	// 		}
-	// 	default:
-	// 		log.Printf("aaaa: %#v\n\n", pkt)
-	// 	}
-	// }
+	assert.Panics(t, func() {
+		assert.Equal(t, "mymsg", DecryptString(ciphered, nil, KeyRingCreate()))
+	})
 
+	_, err := TryToDecryptString(ciphered, nil, KeyRingCreate())
+	assert.Equal(t, ErrKeyIncorrect, err)
+
+	_, err = TryToDecryptString(ciphered, KeyRingCreate(maria), KeyRingCreate(maria))
+	assert.Equal(t, ErrKeyIncorrect, err)
+
+	_, err = TryToDecryptString(ciphered, KeyRingCreate(maria), KeyRingCreate())
+	assert.Equal(t, ErrKeyIncorrect, err)
 }
