@@ -153,23 +153,23 @@ func (me *Decrypter) unsafeDecrypt() {
 	me.reader = msg.UnverifiedBody
 }
 
-func (me *Decrypter) decryptToTempMemory() (int, []byte) {
+func (me *Decrypter) decryptToTempMemory() []byte {
 	buf := make([]byte, me.maxTempMemory+1)
 	read, err := io.ReadAtLeast(me.reader, buf, me.maxTempMemory+1)
 	if err == io.ErrUnexpectedEOF {
-		return read, buf[0:read]
+		return buf[0:read]
 	}
 	util.Check(err)
 	if read != me.maxTempMemory+1 {
 		log.Panicf("Wrong, expect: %d, but was: %d", me.maxTempMemory+1, read)
 	}
-	return read, buf
+	return buf
 }
 
 func (me *Decrypter) decryptToTemp() {
-	read, buf := me.decryptToTempMemory()
-	if read <= me.maxTempMemory {
-		log.Printf("Decrypt to memory, total: %d", read)
+	buf := me.decryptToTempMemory()
+	if len(buf) <= me.maxTempMemory {
+		log.Printf("Decrypt to memory, total: %d", len(buf))
 		me.reader = bytes.NewBuffer(buf)
 		return
 	}
@@ -184,7 +184,7 @@ func (me *Decrypter) decryptToTemp() {
 	w.Write(buf)
 	total, err := io.Copy(w, me.reader)
 	util.Check(err)
-	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
+	log.Printf("Decrypt to %s, total: %d", f.Name(), total+int64(len(buf)))
 	me.tempFile = f.Name()
 }
 
