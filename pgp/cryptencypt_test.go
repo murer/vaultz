@@ -80,6 +80,20 @@ func TestCryptSignUncheck(t *testing.T) {
 	assert.Equal(t, "mymsg", plain)
 }
 
+func TestCryptLarge(t *testing.T) {
+	maria := KeyGenerate("maria", "maria@sample.com")
+	ring := KeyRingCreate(maria)
+	ciphered := EncryptString("01234567890123456789", maria, ring)
+	decrypter := CreateDecrypter(bytes.NewReader(ciphered)).Signers(nil).Decrypt(ring).MaxTempMemory(10)
+	defer decrypter.Close()
+	unsafePlain := util.ReadAllString(decrypter.Start())
+	assert.Equal(t, "01234567890123456789", unsafePlain)
+	decrypter = CreateDecrypter(bytes.NewReader(ciphered)).Signers(ring).Decrypt(ring).MaxTempMemory(10)
+	defer decrypter.Close()
+	plain := util.ReadAllString(decrypter.Start())
+	assert.Equal(t, "01234567890123456789", plain)
+}
+
 func TestCrypt(t *testing.T) {
 	maria := KeyGenerate("maria", "maria@sample.com")
 	bob := KeyGenerate("bob", "bob@sample.com")

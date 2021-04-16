@@ -1,6 +1,7 @@
 package pgp
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"log"
@@ -17,6 +18,7 @@ type Decrypter struct {
 	recipients     *KeyRing
 	signers        *KeyRing
 	symKey         *SymKey
+	maxTempMemory  int
 
 	armorBlock     *armor.Block
 	reader         io.Reader
@@ -27,7 +29,12 @@ type Decrypter struct {
 }
 
 func CreateDecrypter(reader io.Reader) *Decrypter {
-	return &Decrypter{originalReader: reader}
+	return &Decrypter{originalReader: reader, maxTempMemory: 1024 * 1024}
+}
+
+func (me *Decrypter) MaxTempMemory(maxTempMemory int) *Decrypter {
+	me.maxTempMemory = maxTempMemory
+	return me
 }
 
 func (me *Decrypter) Armored(armored bool) *Decrypter {
@@ -80,10 +87,13 @@ func (me *Decrypter) Start() io.Reader {
 
 	me.decryptToTemp()
 	me.checkSign()
-	return me.openTempFile()
+	return me.openTemp()
 }
 
-func (me *Decrypter) openTempFile() io.Reader {
+func (me *Decrypter) openTemp() io.Reader {
+	if me.tempFile == "" {
+		return me.reader
+	}
 	ret, err := os.Open(me.tempFile)
 	util.Check(err)
 	me.tempFileReader = ret
@@ -143,14 +153,36 @@ func (me *Decrypter) unsafeDecrypt() {
 	me.reader = msg.UnverifiedBody
 }
 
+func (me *Decrypter) decryptToTempMemory() (int, []byte) {
+	buf := make([]byte, me.maxTempMemory+1)
+	read, err := io.ReadAtLeast(me.reader, buf, me.maxTempMemory+1)
+	if err == io.ErrUnexpectedEOF {
+		return read, buf[0:read]
+	}
+	util.Check(err)
+	if read != me.maxTempMemory+1 {
+		log.Panicf("Wrong, expect: %d, but was: %d", me.maxTempMemory+1, read)
+	}
+	return read, buf
+}
+
 func (me *Decrypter) decryptToTemp() {
+	read, buf := me.decryptToTempMemory()
+	if read <= me.maxTempMemory {
+		log.Printf("Decrypt to memory, total: %d", read)
+		me.reader = bytes.NewBuffer(buf)
+		return
+	}
+
 	f, err := ioutil.TempFile(os.TempDir(), "vaultz-decrypt-*.tmp")
 	util.Check(err)
 	defer f.Close()
 	me.tempKey = SymKeyGenerate()
 	encrypter := CreateEncrypter(f).Symmetric(me.tempKey)
 	defer encrypter.Close()
-	total, err := io.Copy(encrypter.Start(), me.reader)
+	w := encrypter.Start()
+	w.Write(buf)
+	total, err := io.Copy(w, me.reader)
 	util.Check(err)
 	log.Printf("Decrypt to %s, total: %d", f.Name(), total)
 	me.tempFile = f.Name()
