@@ -129,11 +129,3 @@ func (me *KeyRing) ExportPrivArmored(writer io.Writer) {
 	defer enc.Close()
 	me.ExportPrivBinary(enc.Start())
 }
-
-type Abc struct {
-	KeyRing
-}
-
-func (me *Abc) Ids() []uint64 {
-	return []uint64{4}
-}
