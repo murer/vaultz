@@ -3,7 +3,6 @@ package pgp
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,9 +49,15 @@ func TestKeyRingSerialization(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	ring.ExportPubBinary(buf)
-
 	nring := KeyRingCreate().ImportBinary(buf)
-	log.Printf("ring %#v", nring)
+	assert.Equal(t, a.ExportPubArmored(), nring.Get(a.Id()).ExportPubArmored())
+	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
+	assert.Equal(t, c.ExportPubArmored(), nring.Get(c.Id()).ExportPubArmored())
+	assert.Equal(t, 3, nring.Size())
+
+	buf = new(bytes.Buffer)
+	ring.ExportPubArmored(buf)
+	nring = KeyRingCreate().ImportArmored(buf)
 	assert.Equal(t, a.ExportPubArmored(), nring.Get(a.Id()).ExportPubArmored())
 	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
 	assert.Equal(t, c.ExportPubArmored(), nring.Get(c.Id()).ExportPubArmored())

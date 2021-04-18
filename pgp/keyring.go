@@ -103,3 +103,16 @@ func (me *KeyRing) ImportBinary(reader io.Reader) *KeyRing {
 	me.fromPgpEntityList(lst...)
 	return me
 }
+
+func (me *KeyRing) ExportPubArmored(writer io.Writer) {
+	enc := CreateEncrypter(writer).Armored(openpgp.PublicKeyType)
+	defer enc.Close()
+	me.ExportPubBinary(enc.Start())
+}
+
+func (me *KeyRing) ImportArmored(reader io.Reader) *KeyRing {
+	lst, err := openpgp.ReadArmoredKeyRing(reader)
+	util.Check(err)
+	me.fromPgpEntityList(lst...)
+	return me
+}
