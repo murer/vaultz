@@ -6,9 +6,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/murer/vaultz/util"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/crypto/openpgp"
 )
 
 func TestKeyGen(t *testing.T) {
@@ -51,17 +49,9 @@ func TestKeyRingSerialization(t *testing.T) {
 	ring := KeyRingCreate(a, b, c)
 
 	buf := new(bytes.Buffer)
-	for _, key := range ring.kps {
-		data := key.ExportPubBinary()
-		buf.Write(data)
-	}
+	ring.ExportPubBinary(buf)
 
-	lst, err := openpgp.ReadKeyRing(buf)
-	util.Check(err)
-	log.Printf("ents %#v", lst)
-	assert.Equal(t, 3, len(lst))
-
-	nring := KeyRingCreate().fromPgpEntityList(lst...)
+	nring := KeyRingCreate().ImportBinary(buf)
 	log.Printf("ring %#v", nring)
 	assert.Equal(t, a.ExportPubArmored(), nring.Get(a.Id()).ExportPubArmored())
 	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())

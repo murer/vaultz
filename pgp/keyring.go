@@ -1,9 +1,11 @@
 package pgp
 
 import (
+	"io"
 	"log"
 	"sort"
 
+	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
 )
 
@@ -86,4 +88,18 @@ func (me *KeyRing) PubOnly() *KeyRing {
 		ret.Add(v.PubOnly())
 	}
 	return ret
+}
+
+func (me *KeyRing) ExportPubBinary(writer io.Writer) {
+	for _, key := range me.kps {
+		data := key.ExportPubBinary()
+		writer.Write(data)
+	}
+}
+
+func (me *KeyRing) ImportBinary(reader io.Reader) *KeyRing {
+	lst, err := openpgp.ReadKeyRing(reader)
+	util.Check(err)
+	me.fromPgpEntityList(lst...)
+	return me
 }
