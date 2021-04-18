@@ -41,7 +41,7 @@ func TestKeyGen(t *testing.T) {
 
 }
 
-func TestKeyRingSerialization(t *testing.T) {
+func TestKeyRingExportPub(t *testing.T) {
 	a := KeyGenerate("a", "a@sample.com")
 	b := KeyGenerate("b", "b@sample.com")
 	c := KeyGenerate("c", "c@sample.com")
@@ -54,6 +54,9 @@ func TestKeyRingSerialization(t *testing.T) {
 	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
 	assert.Equal(t, c.ExportPubArmored(), nring.Get(c.Id()).ExportPubArmored())
 	assert.Equal(t, 3, nring.Size())
+	assert.Nil(t, nring.Get(a.Id()).pgpkey.PrivateKey)
+	assert.Nil(t, nring.Get(b.Id()).pgpkey.PrivateKey)
+	assert.Nil(t, nring.Get(c.Id()).pgpkey.PrivateKey)
 
 	buf = new(bytes.Buffer)
 	ring.ExportPubArmored(buf)
@@ -62,4 +65,7 @@ func TestKeyRingSerialization(t *testing.T) {
 	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
 	assert.Equal(t, c.ExportPubArmored(), nring.Get(c.Id()).ExportPubArmored())
 	assert.Equal(t, 3, nring.Size())
+	assert.Nil(t, nring.Get(a.Id()).pgpkey.PrivateKey)
+	assert.Nil(t, nring.Get(b.Id()).pgpkey.PrivateKey)
+	assert.Nil(t, nring.Get(c.Id()).pgpkey.PrivateKey)
 }
