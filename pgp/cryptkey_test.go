@@ -1,10 +1,14 @@
 package pgp
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"testing"
 
+	"github.com/murer/vaultz/util"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/openpgp"
 )
 
 func TestKeyGen(t *testing.T) {
@@ -38,4 +42,29 @@ func TestKeyGen(t *testing.T) {
 	assert.Equal(t, kp.Id(), privkp.Id())
 	fmt.Printf("id: %X\n", privkp.Id())
 
+}
+
+func TestKeyRingSerialization(t *testing.T) {
+	a := KeyGenerate("a", "a@sample.com")
+	b := KeyGenerate("b", "b@sample.com")
+	c := KeyGenerate("c", "c@sample.com")
+	ring := KeyRingCreate(a, b, c)
+
+	buf := new(bytes.Buffer)
+	for _, key := range ring.kps {
+		data := key.ExportPubBinary()
+		buf.Write(data)
+	}
+
+	lst, err := openpgp.ReadKeyRing(buf)
+	util.Check(err)
+	log.Printf("ents %#v", lst)
+	assert.Equal(t, 3, len(lst))
+
+	nring := KeyRingCreate().fromPgpEntityList(lst...)
+	log.Printf("ring %#v", nring)
+	assert.Equal(t, a.ExportPubArmored(), nring.Get(a.Id()).ExportPubArmored())
+	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
+	assert.Equal(t, c.ExportPubArmored(), nring.Get(c.Id()).ExportPubArmored())
+	assert.Equal(t, 3, nring.Size())
 }
