@@ -78,6 +78,8 @@ func TestKeyRingExportPriv(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	ring.ExportPrivBinary(buf)
+	assert.Equal(t, uint8(0xc5), buf.Bytes()[0])
+	assert.NotEqual(t, uint8(0x2d), buf.Bytes()[buf.Len()-1])
 	nring := KeyRingCreate().ImportBinary(buf)
 	assert.Equal(t, a.ExportPubArmored(), nring.Get(a.Id()).ExportPubArmored())
 	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
@@ -89,6 +91,8 @@ func TestKeyRingExportPriv(t *testing.T) {
 
 	buf = new(bytes.Buffer)
 	ring.ExportPrivArmored(buf)
+	assert.Equal(t, uint8(0x2d), buf.Bytes()[0])
+	assert.Equal(t, uint8(0x2d), buf.Bytes()[buf.Len()-1])
 	nring = KeyRingCreate().ImportArmored(buf)
 	assert.Equal(t, a.ExportPubArmored(), nring.Get(a.Id()).ExportPubArmored())
 	assert.Equal(t, b.ExportPubArmored(), nring.Get(b.Id()).ExportPubArmored())
