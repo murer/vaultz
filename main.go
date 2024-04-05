@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/murer/vaultz/pgp"
 	"github.com/murer/vaultz/util"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/packet"
@@ -76,6 +77,9 @@ func main() {
 
 	entity, err := SSHPrivateKeyToPGP(dat, "any", "any", "any")
 	util.Check(err)
+	fmt.Printf("entity: %v\n", entity)
 
-	fmt.Printf("entity len: %v\n", entity)
+	kp := pgp.KeyFromEntity(entity)
+	fmt.Printf("kp: %#v\n", kp)
+
 }
