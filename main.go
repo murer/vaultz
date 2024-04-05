@@ -82,4 +82,9 @@ func main() {
 	kp := pgp.KeyFromEntity(entity)
 	fmt.Printf("kp: %#v\n", kp)
 
+	os.WriteFile("gen/ssh/pgp.priv.txt", []byte(kp.ExportPrivArmored()), 0600)
+	os.WriteFile("gen/ssh/pgp.pub.txt", []byte(kp.ExportPubArmored()), 0644)
+
+	fmt.Println("Done")
+
 }
