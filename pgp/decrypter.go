@@ -117,7 +117,7 @@ func (me *Decrypter) checkSign() {
 	}
 	util.Assert(!me.msg.IsSigned, "Decrypt, msg is not signed")
 	util.Assert(me.msg.Signature == nil, "Decrypt, unknown signer: %X", me.msg.SignedByKeyId)
-	sigKP := keyFromEntity(me.msg.SignedBy.Entity)
+	sigKP := KeyFromEntity(me.msg.SignedBy.Entity)
 	pubKey := sigKP.ExportPubArmored()
 	for _, v := range me.signers.kps {
 		if v.ExportPubArmored() == pubKey {
