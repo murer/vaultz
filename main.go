@@ -85,6 +85,14 @@ func main() {
 	os.WriteFile("gen/ssh/pgp.priv.txt", []byte(kp.ExportPrivArmored()), 0600)
 	os.WriteFile("gen/ssh/pgp.pub.txt", []byte(kp.ExportPubArmored()), 0644)
 
+	kr := pgp.KeyRingCreate(kp)
+
+	crypt := pgp.EncryptString("plain", kp, kr)
+	os.WriteFile("gen/ssh/encrypted.bin", crypt, 0644)
+
+	plain := pgp.DecryptString(crypt, kr, kr)
+	fmt.Printf("Plain: %s\n", plain)
+
 	fmt.Println("Done")
 
 }
