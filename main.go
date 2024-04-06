@@ -17,7 +17,7 @@ var Config = &packet.Config{
 	CompressionConfig: &packet.CompressionConfig{
 		Level: packet.BestCompression,
 	},
-	RSABits: 512,
+	RSABits: 4096,
 }
 
 func Check(err error) {
