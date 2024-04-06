@@ -58,6 +58,7 @@ func main() {
 	msg, err := openpgp.ReadMessage(reader, dests, nil, Config)
 	Check(err)
 	log.Printf("isSigned: %v", msg.IsSigned)
+	log.Printf("SignatureError: %#v", msg.SignatureError)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
 	buf.ReadFrom(msg.LiteralData.Body)
