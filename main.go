@@ -60,7 +60,7 @@ func main() {
 	log.Printf("isSigned: %v", msg.IsSigned)
 	log.Printf("SignatureError: %#v", msg.SignatureError)
 	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
-	log.Printf("SignedByKeyId: %v", msg.SignedBy)
+	log.Printf("SignedBy: %v", msg.SignedBy)
 	// log.Printf("Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
 	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
