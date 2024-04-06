@@ -60,7 +60,7 @@ func main() {
 	log.Printf("isSigned: %v", msg.IsSigned)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
-	buf.ReadFrom(reader)
+	buf.ReadFrom(msg.LiteralData.Body)
 	data := string(buf.Bytes())
 	log.Printf("Decrypted: %s", data)
 
