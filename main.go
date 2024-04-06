@@ -53,4 +53,15 @@ func main() {
 
 	log.Printf("Encrypted: %x", buf.Bytes())
 
+	log.Printf("Decrypting")
+	reader := bytes.NewReader(buf.Bytes())
+	msg, err := openpgp.ReadMessage(reader, dests, nil, Config)
+	Check(err)
+	log.Printf("isSigned: %v", msg.IsSigned)
+	log.Printf("isEncrypted: %v", msg.IsEncrypted)
+	buf = &bytes.Buffer{}
+	buf.ReadFrom(reader)
+	data := string(buf.Bytes())
+	log.Printf("Decrypted: %s", data)
+
 }
