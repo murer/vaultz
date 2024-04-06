@@ -16,7 +16,7 @@ var Config = &packet.Config{
 	CompressionConfig: &packet.CompressionConfig{
 		Level: packet.BestCompression,
 	},
-	RSABits: 1024,
+	RSABits: 512,
 }
 
 func Check(err error) {
@@ -43,18 +43,14 @@ func main() {
 	dests = append(dests, dstKP2)
 
 	buf := new(bytes.Buffer)
-	// func() {
-	// 	encrypter := CreateEncrypter(buf).Sign(signer).Recipients(recipients)
-	// 	defer encrypter.Close()
-	// 	encrypter.Start().Write(plain)
-	// }()
-	// return buf.Bytes()
-
+	log.Printf("Encrypting")
 	func() {
 		cwriter, err := openpgp.Encrypt(buf, dests, fromKP, nil, Config)
 		Check(err)
 		defer cwriter.Close()
 		cwriter.Write([]byte("mymsg"))
 	}()
+
+	log.Printf("Encrypted: %x", buf.Bytes())
 
 }
