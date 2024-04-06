@@ -60,7 +60,7 @@ func main() {
 	buf := new(bytes.Buffer)
 	log.Printf("Encrypting")
 	func() {
-		cwriter, err := openpgp.Encrypt(buf, dests, nil, nil, Config)
+		cwriter, err := openpgp.Encrypt(buf, dests, fromKP, nil, Config)
 		Check(err)
 		defer cwriter.Close()
 		cwriter.Write([]byte("mymsg"))
