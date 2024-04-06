@@ -50,9 +50,11 @@ func main() {
 	// }()
 	// return buf.Bytes()
 
-	cwriter, err := openpgp.Encrypt(buf, dests, fromKP, nil, Config)
-	Check(err)
-
-	cwriter.Write([]byte("mymsg"))
+	func() {
+		cwriter, err := openpgp.Encrypt(buf, dests, fromKP, nil, Config)
+		Check(err)
+		defer cwriter.Close()
+		cwriter.Write([]byte("mymsg"))
+	}()
 
 }
