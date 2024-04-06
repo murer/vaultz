@@ -59,10 +59,15 @@ func main() {
 	Check(err)
 	log.Printf("isSigned: %v", msg.IsSigned)
 	log.Printf("SignatureError: %#v", msg.SignatureError)
+	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
+	log.Printf("SignedByKeyId: %v", msg.SignedBy)
+	// log.Printf("Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
+	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
+	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
+	log.Printf("Signature: %#v", msg.Signature)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
 	buf.ReadFrom(msg.LiteralData.Body)
 	data := buf.String()
 	log.Printf("Decrypted: %s", data)
-
 }
