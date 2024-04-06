@@ -61,7 +61,7 @@ func main() {
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
 	buf.ReadFrom(msg.LiteralData.Body)
-	data := string(buf.Bytes())
+	data := buf.String()
 	log.Printf("Decrypted: %s", data)
 
 }
