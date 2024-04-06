@@ -71,7 +71,7 @@ func SSHPrivateKeyToPGP(sshPrivateKey []byte, name string, comment string, email
 	return gpgKey, nil
 }
 
-func main() {
+func main2() {
 	dat, err := os.ReadFile("gen/ssh/key")
 	util.Check(err)
 
