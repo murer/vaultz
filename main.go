@@ -23,6 +23,7 @@ func GetBaseFile(filename string) string {
 	ret := filepath.Join(base, filename)
 	dir := filepath.Dir(ret)
 	os.MkdirAll(dir, os.ModePerm)
+	return ret
 }
 
 func Check(err error) {
@@ -63,7 +64,18 @@ func GenerateKeyPair(name string) {
 	kp, err := openpgp.NewEntity(name, name, fmt.Sprintf("%s@any", name), Config())
 	Check(err)
 	log.Printf("Generating key %s: %s\n", name, kp.PrimaryKey.KeyIdString())
-	GetBaseFile(fmt.Sprintf("pubkey/%s.pubkey.txt", name))
+	file := GetBaseFile(fmt.Sprintf("pubkey/%s.pubkey.txt", name))
+	writer, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	Check(err)
+	(func() {
+		defer writer.Close()
+		(func() {
+			awriter := ArmorIn(writer, openpgp.PublicKeyType)
+			defer awriter.Close()
+			kp.PrimaryKey.Serialize(awriter)
+		})()
+		writer.Write([]byte{10})
+	})()
 	// log.Println(ArmorInPublicKey(fromKP.PrimaryKey))
 }
 
