@@ -95,6 +95,7 @@ func ReadKey(filename string) *openpgp.Entity {
 	if len(kr) != 1 {
 		log.Panicf("Too many keys: %d\n", len(kr))
 	}
+	log.Printf("Key read %s from %s", kr[0].PrimaryKey.KeyIdString(), filename)
 	return kr[0]
 }
 
