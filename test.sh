@@ -5,8 +5,11 @@ _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
 export VAULTZ_BASE="target/test/vaultz"
 
 function cmd_prepare() {
-    rm -rf "gen/test" || true
-    mkdir -p "gen/test"
+    rm -rf "target/test" || true
+    mkdir -p "target/test/sample"
+
+    echo aaavalue > "target/test/sample/a.secret.txt"
+    echo bbbvalue > "target/test/sample/b.secret.txt"
 }
 
 function cmd_test_help() {
