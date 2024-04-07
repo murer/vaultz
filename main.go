@@ -72,9 +72,9 @@ func GenerateKeyPair(name string) {
 	// (func() {
 	awriter := ArmorIn(pub, openpgp.PublicKeyType)
 	defer awriter.Close()
-	// defer log.Println("a2")
+	defer log.Println("a2")
 	kp.PrimaryKey.Serialize(awriter)
-	awriter.Write([]byte("test"))
+	// awriter.Write([]byte("test"))
 	// })()
 	// pub.Write([]byte{10})
 	// })()
