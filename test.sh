@@ -21,19 +21,13 @@ function cmd_test_crypt() {
     $_vaultz_bin keygen --name kreader2
     $_vaultz_bin keygen --name kwriter
 
-    $_vaultz_bin encrypt --file sample/a.secret.txt
-    $_vaultz_bin decrypt --file sample/b.secret.txt
-}
-
-function cmd_test_vault() {
-    $_vaultz_bin encrypt sample/a1.secret.txt
-    $_vaultz_bin decrypt sample/a1.secret.txt
+    $_vaultz_bin encrypt --file target/test/sample/a.secret.txt
+    $_vaultz_bin decrypt --file target/test/sample/b.secret.txt
 }
 
 function cmd_all() {
     cmd_test_crypt
     cmd_test_help
-    cmd_test_vault
 }
 
 cmd_prepare
