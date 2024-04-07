@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 )
 
 func main() {
@@ -15,11 +16,14 @@ dGVzdA==
 =+G7Q
 -----END PGP PUBLIC KEY BLOCK-----`
 	buf := bytes.NewBuffer([]byte(key))
-	// x, err := armor.Decode(buf)
-	x, err := openpgp.ReadArmoredKeyRing(buf)
+	x, err := armor.Decode(buf)
 	if err != nil {
 		panic(err)
 	}
-	// fmt.Println(x.Type)
-	fmt.Printf("x: %v", x)
+	fmt.Println(x.Type)
+	y, err := openpgp.ReadArmoredKeyRing(buf)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("x: %v", y)
 }
