@@ -76,26 +76,26 @@ func GenerateKeyPair(name string) {
 	Check(err)
 	log.Printf("Generating key %s: %s\n", name, kp.PrimaryKey.KeyIdString())
 	file := GetBaseFile(fmt.Sprintf("pubkey/%s.pubkey.txt", name))
-	writer, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PUB)
+	pub, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PUB)
 	Check(err)
-	defer writer.Close()
+	defer pub.Close()
 	(func() {
-		awriter := ArmorIn(writer, openpgp.PublicKeyType)
+		awriter := ArmorIn(pub, openpgp.PublicKeyType)
 		defer awriter.Close()
 		kp.PrimaryKey.Serialize(awriter)
 	})()
-	writer.Write([]byte{10})
+	pub.Write([]byte{10})
 
 	file = GetBaseFile("gen/privkey/privkey.txt")
-	writer, err = os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PRIV)
+	priv, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PRIV)
 	Check(err)
-	defer writer.Close()
+	defer priv.Close()
 	(func() {
-		awriter := ArmorIn(writer, openpgp.PrivateKeyType)
+		awriter := ArmorIn(priv, openpgp.PrivateKeyType)
 		defer awriter.Close()
 		kp.PrivateKey.Serialize(awriter)
 	})()
-	writer.Write([]byte{10})
+	priv.Write([]byte{10})
 }
 
 func ReadKey(filename string) {
