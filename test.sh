@@ -1,7 +1,8 @@
 #!/bin/bash -xe
 
 _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
-_vaultz_base="gen/vaultz"
+
+export _vaultz_base="gen/vaultz"
 
 function cmd_prepare() {
     rm -rf "$_vaultz_base" || true
