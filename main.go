@@ -49,7 +49,7 @@ type KeygenCommand struct {
 }
 
 func (me *KeygenCommand) Run() {
-	log.Println("bbb")
+	log.Printf("Key gen name: %s\n", *me.FlagName)
 }
 
 func (me *KeygenCommand) PrepareFlags(flags *flag.FlagSet) {
