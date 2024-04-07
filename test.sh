@@ -2,19 +2,32 @@
 
 _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
 
-function cmd_help() {
+function cmd_prepare() {
+    rm -rf gen/vaultz || true
+    mkdir -p gen/vaultz
+}
+
+function cmd_test_help() {
     $_vaultz_bin "--help"
 }
 
-function cmd_crypt() {
+function cmd_test_crypt() {
+    $_vaultz_bin encrypt sample/a1.secret.txt
+    $_vaultz_bin decrypt sample/a1.secret.txt
+}
+
+function cmd_test_vault() {
     $_vaultz_bin encrypt sample/a1.secret.txt
     $_vaultz_bin decrypt sample/a1.secret.txt
 }
 
 function cmd_all() {
-    cmd_crypt
-    cmd_help
+    cmd_test_crypt
+    cmd_test_help
+    cmd_test_vault
 }
+
+cmd_prepare
 
 cd "$(dirname "$0")"; _cmd="${1?"cmd is required"}"; shift; "cmd_${_cmd}" "$@"
 
