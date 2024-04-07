@@ -36,6 +36,9 @@ func parseCommands(args []string) {
 	}
 	log.Printf("Command: %s, args: %s\n", subcommand, args)
 	command := commands[subcommand]
+	if command == nil {
+		log.Panicf("Wrong command: %s, try to use help", subcommand)
+	}
 	log.Printf("AAA: %#v\n", command)
 }
 
