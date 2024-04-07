@@ -99,6 +99,7 @@ func EncryptFile(filename string) {
 	Check(err)
 	(func() {
 		defer file.Close()
+
 	})()
 }
 
