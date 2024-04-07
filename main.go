@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 )
 
 func Check(err error) {
@@ -38,7 +39,7 @@ func (me *HelpCommand) Run() {
 	log.Println("bbb")
 }
 
-func parseCommands() map[string]Command {
+func createCommands() map[string]Command {
 	ret := make(map[string]Command)
 	(func(cmds []Command) {
 		for _, cmd := range cmds {
@@ -50,6 +51,21 @@ func parseCommands() map[string]Command {
 	return ret
 }
 
+func handleCommands(args []string) {
+	commands := createCommands()
+	subcommand := "help"
+	if len(args) >= 2 {
+		subcommand = args[1]
+		args = args[2:]
+	}
+	log.Printf("Command: %s, args: %s\n", subcommand, args)
+	command := commands[subcommand]
+	if command == nil {
+		log.Panicf("Wrong command: %s, try to use help", subcommand)
+	}
+	command.Run()
+}
+
 func main() {
-	parseCommands()
+	handleCommands(os.Args)
 }
