@@ -2,7 +2,7 @@
 
 _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
 
-export VAULTZ_BASE="gen/test"
+export VAULTZ_BASE="target/test/vaultz"
 
 function cmd_prepare() {
     rm -rf "gen/test" || true
