@@ -122,7 +122,7 @@ func ReadPrivKey() {
 	defer file.Close()
 	block, err := armor.Decode(file)
 	Check(err)
-	if block.Type != "PGP AAAA KEY BLOCK" {
+	if block.Type != "PGP PRIVATE KEY BLOCK" {
 		log.Panicf("Wrong key: %s (%s)\n", filename, block.Type)
 	}
 	kr, err := openpgp.ReadKeyRing(block.Body)
