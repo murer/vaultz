@@ -1,40 +1,70 @@
 package main
 
 import (
+	"bytes"
+	"crypto"
 	"fmt"
-	"strings"
+	"time"
 
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
+	"golang.org/x/crypto/openpgp/packet"
 )
 
+var Config = &packet.Config{
+	DefaultHash:            crypto.SHA256,
+	DefaultCipher:          packet.CipherAES256,
+	DefaultCompressionAlgo: packet.CompressionZLIB,
+	RSABits:                2048,
+	Time: func() time.Time {
+		return time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	},
+}
+
 func main() {
-	const publicKey = `
------BEGIN PGP PUBLIC KEY BLOCK-----
-
-xk0EZhMdugECAKOAoGPxax0A2d518Pa0XfKU97JU4UrLXLCVtPs0aAT/5N22dgEe
-6aKhUrfQ3cFTGBqO6GZsym4V1bVjxBJR/7UAEQEAAQ==
-=Za+/
------END PGP PUBLIC KEY BLOCK----
-`
-
-	// Convert the public key string to a reader
-	reader := strings.NewReader(publicKey)
-
-	// Read the armored public key
-	entities, err := openpgp.ReadArmoredKeyRing(reader)
+	// Generate a new OpenPGP key pair
+	entity, err := openpgp.NewEntity("Example User", "Test Only", "example@example.com", Config)
 	if err != nil {
-		fmt.Printf("Error reading armored public key: %v\n", err)
-		return
+		panic(err)
 	}
 
-	// Assuming there is at least one entity in the keyring
-	if len(entities) > 0 {
-		entity := entities[0]
-		fmt.Println("Successfully read PGP public key:")
-		for _, identity := range entity.Identities {
-			fmt.Printf("Identity: %s\n", identity.Name)
-		}
+	// Serialize the public key into a bytes.Buffer
+	pubKeyBuf := bytes.NewBuffer(nil)
+	err = entity.Serialize(pubKeyBuf)
+	if err != nil {
+		panic(err)
+	}
+
+	// For demonstration, we'll also serialize the public key in armored format
+	armoredBuf := bytes.NewBuffer(nil)
+	armoredWriter, err := armor.Encode(armoredBuf, openpgp.PublicKeyType, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = entity.Serialize(armoredWriter)
+	if err != nil {
+		panic(err)
+	}
+	err = armoredWriter.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Armored Public Key:")
+	fmt.Println(armoredBuf.String())
+
+	// Parse the serialized public key back into an entity
+	pubKeyReader := bytes.NewReader(pubKeyBuf.Bytes())
+	pubEntity, err := openpgp.ReadKeyRing(pubKeyReader)
+	if err != nil {
+		panic(err)
+	}
+
+	// Assuming the first key in the ring is the one we're interested in
+	if len(pubEntity) > 0 {
+		fmt.Println("Successfully parsed public key back into an entity.")
+		fmt.Printf("Entity details: %s <%s>\n", pubEntity[0].PrimaryKey.Fingerprint, pubEntity[0].PrimaryKey.KeyIdString())
 	} else {
-		fmt.Println("No entities found in the PGP public key.")
+		fmt.Println("No keys found in the parsed key ring.")
 	}
 }
