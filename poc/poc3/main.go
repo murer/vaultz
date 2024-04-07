@@ -8,12 +8,16 @@ import (
 )
 
 func main() {
-	buf := new(bytes.Buffer)
-	x, err := armor.Encode(buf, "AAAA", nil)
+	key := `
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+dGVzdA==
+=+G7Q
+-----END PGP PUBLIC KEY BLOCK-----`
+	buf := bytes.NewBuffer([]byte(key))
+	x, err := armor.Decode(buf)
 	if err != nil {
 		panic(err)
 	}
-	x.Write([]byte("bla"))
-	x.Close()
-	fmt.Println(buf.String())
+	fmt.Println(x.Type)
 }
