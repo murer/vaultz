@@ -107,9 +107,11 @@ func ReadKey(filename string) {
 	if block.Type != "PGP PUBLIC KEY BLOCK" {
 		log.Panicf("Wrong key: %s", filename)
 	}
-	kr, err := openpgp.ReadArmoredKeyRing(file)
+	// kr, err := openpgp.ReadArmoredKeyRing(file)
+	kr, err := openpgp.ReadKeyRing(block.Body)
 	Check(err)
 	log.Printf("kkk: %v\n", kr)
+
 }
 
 func ReadPubKeys() {
