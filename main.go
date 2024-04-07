@@ -15,6 +15,7 @@ func Check(err error) {
 type Command interface {
 	GetName() string
 	PrepareFlags(flags *flag.FlagSet)
+	GetFlagSet() *flag.FlagSet
 	Run()
 }
 
@@ -33,6 +34,10 @@ func (me *BaseCommand) PrepareFlags(flags *flag.FlagSet) {
 
 func (me *BaseCommand) Run() {
 	log.Println("aaaa")
+}
+
+func (me *BaseCommand) GetFlagSet() *flag.FlagSet {
+	return me.FlagSet
 }
 
 type HelpCommand struct {
@@ -87,6 +92,7 @@ func handleCommands(args []string) {
 	if command == nil {
 		log.Panicf("Wrong command: %s, try to use help", subcommand)
 	}
+	command.GetFlagSet().Parse(args)
 	command.Run()
 }
 
