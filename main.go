@@ -99,10 +99,14 @@ func GenerateKeyPair(name string) {
 }
 
 func ReadKey(filename string) {
-	log.Printf("aaaa: %s\n", filename)
 	file, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
 	Check(err)
 	defer file.Close()
+	block, err := armor.Decode(file)
+	Check(err)
+	if block.Type != "PGP PUBLIC KEY BLOCK" {
+		log.Panicf("Wrong key: %s", filename)
+	}
 	kr, err := openpgp.ReadArmoredKeyRing(file)
 	Check(err)
 	log.Printf("kkk: %v\n", kr)
