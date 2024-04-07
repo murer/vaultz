@@ -132,7 +132,6 @@ func EncryptFile(filename string) {
 	(func() {
 		adestfile := ArmorIn(destfile, "PGP MESSAGE")
 		defer adestfile.Close()
-		log.Printf("xxx: %#v\n", Config)
 		writer, err := openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
 		Check(err)
 		defer writer.Close()
