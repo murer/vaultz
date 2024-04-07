@@ -125,6 +125,8 @@ func (me *BaseCommand) GetFlagSet() *flag.FlagSet {
 	return me.FlagSet
 }
 
+// ****************************************
+
 type HelpCommand struct {
 	BaseCommand
 }
@@ -136,6 +138,8 @@ func (me *HelpCommand) Run() {
 		os.Stdout.Write([]byte{10, 10})
 	}
 }
+
+// ****************************************
 
 type KeygenCommand struct {
 	BaseCommand
@@ -151,6 +155,24 @@ func (me *KeygenCommand) PrepareFlags(flags *flag.FlagSet) {
 	me.FlagSet = flags
 }
 
+// ****************************************
+
+type EncryptCommand struct {
+	BaseCommand
+	FlagName *string
+}
+
+func (me *EncryptCommand) Run() {
+	GenerateKeyPair(*me.FlagName)
+}
+
+func (me *EncryptCommand) PrepareFlags(flags *flag.FlagSet) {
+	me.FlagName = flags.String("name", "", "Key name")
+	me.FlagSet = flags
+}
+
+// ****************************************
+
 func createCommands() map[string]Command {
 	ret := make(map[string]Command)
 	(func(cmds []Command) {
@@ -161,6 +183,7 @@ func createCommands() map[string]Command {
 	})([]Command{
 		&HelpCommand{BaseCommand: BaseCommand{"help", ret, nil}},
 		&KeygenCommand{BaseCommand: BaseCommand{"keygen", ret, nil}},
+		&EncryptCommand{BaseCommand: BaseCommand{"encrypt", ret, nil}},
 	})
 	return ret
 }
