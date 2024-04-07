@@ -167,7 +167,7 @@ func (me *EncryptCommand) Run() {
 }
 
 func (me *EncryptCommand) PrepareFlags(flags *flag.FlagSet) {
-	me.FlagName = flags.String("name", "", "Key name")
+	me.FlagName = flags.String("file", "", "File to be encrypted")
 	me.FlagSet = flags
 }
 
