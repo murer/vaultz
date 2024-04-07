@@ -43,7 +43,7 @@ func ArmorInBytes(data []byte) string {
 	return buf.String()
 }
 
-func ArmorInPublicKey(key *packet.PublicKey) string {
+func ArmorInPublicKey(key *openpgp.Entity) string {
 	buf := new(bytes.Buffer)
 	func() {
 		writer := ArmorIn(buf, openpgp.PublicKeyType)
@@ -57,17 +57,17 @@ func main() {
 	fromKP, err := openpgp.NewEntity("John1", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("From key pair: %v", fromKP.PrimaryKey.KeyIdString())
-	log.Println(ArmorInPublicKey(fromKP.PrimaryKey))
+	log.Println(ArmorInPublicKey(fromKP))
 
 	dstKP1, err := openpgp.NewEntity("John2", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("Dest key pair: %v", dstKP1.PrimaryKey.KeyIdString())
-	log.Println(ArmorInPublicKey(dstKP1.PrimaryKey))
+	log.Println(ArmorInPublicKey(dstKP1))
 
 	dstKP2, err := openpgp.NewEntity("John3", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("Dest key pair: %v", dstKP2.PrimaryKey.KeyIdString())
-	log.Println(ArmorInPublicKey(dstKP2.PrimaryKey))
+	log.Println(ArmorInPublicKey(dstKP2))
 
 	var dests openpgp.EntityList
 	dests = append(dests, dstKP1)
