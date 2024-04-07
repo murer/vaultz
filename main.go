@@ -149,9 +149,9 @@ func EncryptFile(filename string) {
 	destfile, err := os.OpenFile(destfilename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PUB)
 	Check(err)
 	defer destfile.Close()
-	adestfile := ArmorIn(destfile, "PGP MESSAGE")
-	defer adestfile.Close()
-	_, err = openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
+	// adestfile := ArmorIn(destfile, "PGP MESSAGE")
+	// defer adestfile.Close()
+	_, err = openpgp.Encrypt(destfile, pubkeys, privkey, nil, Config)
 	Check(err)
 	// (func() {
 	// 	defer writer.Close()
