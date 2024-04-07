@@ -45,11 +45,11 @@ type HelpCommand struct {
 }
 
 func (me *HelpCommand) Run() {
-	// me.Flags().Output().Write([]byte{10})
-	// for _, cmd := range me.cmds {
-	// 	cmd.Flags().Usage()
-	// 	os.Stdout.Write([]byte{10, 10})
-	// }
+	me.FlagSet.Output().Write([]byte{10})
+	for _, cmd := range me.Cmds {
+		cmd.GetFlagSet().Usage()
+		os.Stdout.Write([]byte{10, 10})
+	}
 }
 
 type KeygenCommand struct {
