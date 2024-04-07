@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 )
@@ -13,7 +14,7 @@ func Check(err error) {
 
 type Command interface {
 	GetName() string
-	// Flags() *flag.FlagSet
+	PrepareFlags(flags *flag.FlagSet)
 	Run()
 }
 
@@ -25,6 +26,9 @@ type BaseCommand struct {
 
 func (me *BaseCommand) GetName() string {
 	return me.Name
+}
+
+func (me *BaseCommand) PrepareFlags(flags *flag.FlagSet) {
 }
 
 func (me *BaseCommand) Run() {
@@ -39,14 +43,29 @@ func (me *HelpCommand) Run() {
 	log.Println("bbb")
 }
 
+type KeygenCommand struct {
+	BaseCommand
+	FlagName *string
+}
+
+func (me *KeygenCommand) Run() {
+	log.Println("bbb")
+}
+
+func (me *KeygenCommand) PrepareFlags(flags *flag.FlagSet) {
+	me.FlagName = flags.String("name", "", "Key name")
+}
+
 func createCommands() map[string]Command {
 	ret := make(map[string]Command)
 	(func(cmds []Command) {
 		for _, cmd := range cmds {
+			cmd.PrepareFlags(flag.NewFlagSet(cmd.GetName(), flag.ExitOnError))
 			ret[cmd.GetName()] = cmd
 		}
 	})([]Command{
-		&HelpCommand{BaseCommand{Name: "help"}},
+		&HelpCommand{BaseCommand: BaseCommand{Name: "help"}},
+		&KeygenCommand{BaseCommand: BaseCommand{Name: "keygen"}},
 	})
 	return ret
 }
