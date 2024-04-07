@@ -11,12 +11,17 @@ func Check(err error) {
 }
 
 type Command interface {
-	// Name() string
+	Name() string
 	// Flags() *flag.FlagSet
 	Run()
 }
 
 type BaseCommand struct {
+	name string
+}
+
+func (me *BaseCommand) Name() string {
+	return me.name
 }
 
 func (me *BaseCommand) Run() {
@@ -31,6 +36,18 @@ func (me *HelpCommand) Run() {
 	log.Println("bbb")
 }
 
+func parseCommands() {
+	ret := make(map[string]Command)
+	(func(cmds []Command) {
+		for _, cmd := range cmds {
+
+		}
+	})([]Command{
+		&BaseCommand{},
+		&HelpCommand{},
+	})
+}
+
 func main() {
 	a := BaseCommand{}
 	a.Run()
@@ -39,8 +56,8 @@ func main() {
 	b.Run()
 
 	cmds := []Command{
-		&BaseCommand{},
-		&HelpCommand{},
+		&BaseCommand{"base"},
+		&HelpCommand{BaseCommand: BaseCommand{"help"}},
 	}
 	log.Printf("kkkkk: %#v\n", cmds)
 	for _, cmd := range cmds {
