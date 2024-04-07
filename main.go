@@ -3,12 +3,15 @@ package main
 import (
 	"bytes"
 	"crypto"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
@@ -33,6 +36,11 @@ func Check(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func SHA256(data []byte) string {
+	hash := sha256.Sum256(data)
+	return strings.ToLower(hex.EncodeToString(hash[:]))
 }
 
 func Config() *packet.Config {
@@ -95,6 +103,7 @@ func GenerateKeyPair(name string) {
 }
 
 func EncryptFile(filename string) {
+	destfilename := SHA256([]byte(filename))
 	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
 	Check(err)
 	(func() {
