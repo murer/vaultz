@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto"
 	"fmt"
-	"time"
 
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
@@ -15,10 +14,10 @@ var Config = &packet.Config{
 	DefaultHash:            crypto.SHA256,
 	DefaultCipher:          packet.CipherAES256,
 	DefaultCompressionAlgo: packet.CompressionZLIB,
-	RSABits:                2048,
-	Time: func() time.Time {
-		return time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	CompressionConfig: &packet.CompressionConfig{
+		Level: packet.BestCompression,
 	},
+	RSABits: 512,
 }
 
 func main() {
