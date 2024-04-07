@@ -95,7 +95,11 @@ func GenerateKeyPair(name string) {
 }
 
 func EncryptFile(filename string) {
-
+	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
+	Check(err)
+	(func() {
+		defer file.Close()
+	})()
 }
 
 // ****************************************
