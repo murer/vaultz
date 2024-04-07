@@ -85,7 +85,7 @@ func main() {
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
 	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey, openpgp.PublicKeyType))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
-	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
+	log.Printf("IsSymmetricallyEncrypted: %v", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
@@ -115,7 +115,7 @@ func main() {
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
 	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey, openpgp.PublicKeyType))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
-	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
+	log.Printf("IsSymmetricallyEncrypted: %v", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
