@@ -18,8 +18,8 @@ function cmd_test_crypt() {
     $_vaultz_bin keygen --name kreader2
     $_vaultz_bin keygen --name kwriter
 
-    $_vaultz_bin encrypt sample/a.secret.txt
-    $_vaultz_bin decrypt sample/b.secret.txt
+    $_vaultz_bin encrypt --file sample/a.secret.txt
+    $_vaultz_bin decrypt --file sample/b.secret.txt
 }
 
 function cmd_test_vault() {
