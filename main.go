@@ -1,9 +1,14 @@
 package main
 
 import (
+	"crypto"
 	"flag"
+	"fmt"
 	"log"
 	"os"
+
+	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/packet"
 )
 
 func Check(err error) {
@@ -11,6 +16,27 @@ func Check(err error) {
 		panic(err)
 	}
 }
+
+func Config() *packet.Config {
+	return &packet.Config{
+		DefaultHash:            crypto.SHA256,
+		DefaultCipher:          packet.CipherAES256,
+		DefaultCompressionAlgo: packet.CompressionZLIB,
+		CompressionConfig: &packet.CompressionConfig{
+			Level: packet.BestCompression,
+		},
+		RSABits: 512,
+	}
+}
+
+func GenerateKeyPair(name string) {
+	kp, err := openpgp.NewEntity(name, name, fmt.Sprintf("%s@any", name), Config())
+	Check(err)
+	log.Printf("Generating key %s: %s\n", name, kp.PrimaryKey.KeyIdString())
+	// log.Println(ArmorInPublicKey(fromKP.PrimaryKey))
+}
+
+// ****************************************
 
 type Command interface {
 	GetName() string
@@ -59,7 +85,7 @@ type KeygenCommand struct {
 }
 
 func (me *KeygenCommand) Run() {
-	log.Printf("Key gen name: %s\n", *me.FlagName)
+	GenerateKeyPair(*me.FlagName)
 }
 
 func (me *KeygenCommand) PrepareFlags(flags *flag.FlagSet) {
