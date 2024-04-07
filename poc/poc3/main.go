@@ -25,5 +25,5 @@ dGVzdA==
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("x: %v", y)
+	fmt.Printf("x: %#v", y)
 }
