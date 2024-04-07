@@ -108,11 +108,14 @@ func ReadKey(filename string) {
 		log.Panicf("Wrong key: %s", filename)
 	}
 	// kr, err := openpgp.ReadArmoredKeyRing(file)
-	// kr, err := openpgp.ReadKeyRing(block.Body)
-	// Check(err)
+	kr, err := openpgp.ReadKeyRing(block.Body)
+	Check(err)
+	log.Printf("kkk: %v\n", kr)
 
-	packets := packet.NewReader(block.Body)
-	log.Printf("kkk: %v\n", packets)
+	// packets := packet.NewReader(block.Body)
+	// x, err := openpgp.ReadEntity(packets)
+	// Check(err)
+	// log.Printf("kkk: %v\n", x)
 
 }
 
