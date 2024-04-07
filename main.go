@@ -20,6 +20,16 @@ import (
 const F_PUB = 0644
 const F_PRIV = 0600
 
+var Config = &packet.Config{
+	DefaultHash:            crypto.SHA256,
+	DefaultCipher:          packet.CipherAES256,
+	DefaultCompressionAlgo: packet.CompressionZLIB,
+	CompressionConfig: &packet.CompressionConfig{
+		Level: packet.BestCompression,
+	},
+	RSABits: 512,
+}
+
 func GetBaseFile(filename string) string {
 	base := os.Getenv("VAULTZ_BASE")
 	if base == "" {
@@ -42,18 +52,6 @@ func SHA256(data []byte) string {
 	return strings.ToLower(hex.EncodeToString(hash[:]))
 }
 
-func Config() *packet.Config {
-	return &packet.Config{
-		DefaultHash:            crypto.SHA256,
-		DefaultCipher:          packet.CipherAES256,
-		DefaultCompressionAlgo: packet.CompressionZLIB,
-		CompressionConfig: &packet.CompressionConfig{
-			Level: packet.BestCompression,
-		},
-		RSABits: 512,
-	}
-}
-
 func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
 	ret, err := armor.Encode(writer, blockType, nil)
 	Check(err)
@@ -61,7 +59,7 @@ func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
 }
 
 func GenerateKeyPair(name string) {
-	kp, err := openpgp.NewEntity(name, name, fmt.Sprintf("%s@any", name), Config())
+	kp, err := openpgp.NewEntity(name, name, fmt.Sprintf("%s@any", name), Config)
 	Check(err)
 	log.Printf("Generating key %s: %s\n", name, kp.PrimaryKey.KeyIdString())
 	file := GetBaseFile(fmt.Sprintf("pubkey/%s.pubkey.txt", name))
@@ -74,8 +72,8 @@ func GenerateKeyPair(name string) {
 	// (func() {
 	awriter := ArmorIn(pub, openpgp.PublicKeyType)
 	defer awriter.Close()
-	defer log.Println("a2")
-	// kp.PrimaryKey.Serialize(awriter)
+	// defer log.Println("a2")
+	kp.PrimaryKey.Serialize(awriter)
 	awriter.Write([]byte("test"))
 	// })()
 	// pub.Write([]byte{10})
