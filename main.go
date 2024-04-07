@@ -20,7 +20,6 @@ type Command interface {
 
 type BaseCommand struct {
 	Name string
-
 	Cmds map[string]Command
 }
 
@@ -40,7 +39,11 @@ type HelpCommand struct {
 }
 
 func (me *HelpCommand) Run() {
-	log.Println("bbb")
+	// me.Flags().Output().Write([]byte{10})
+	// for _, cmd := range me.cmds {
+	// 	cmd.Flags().Usage()
+	// 	os.Stdout.Write([]byte{10, 10})
+	// }
 }
 
 type KeygenCommand struct {
@@ -64,8 +67,8 @@ func createCommands() map[string]Command {
 			ret[cmd.GetName()] = cmd
 		}
 	})([]Command{
-		&HelpCommand{BaseCommand: BaseCommand{Name: "help"}},
-		&KeygenCommand{BaseCommand: BaseCommand{Name: "keygen"}},
+		&HelpCommand{BaseCommand: BaseCommand{"help", ret}},
+		&KeygenCommand{BaseCommand: BaseCommand{"keygen", ret}},
 	})
 	return ret
 }
