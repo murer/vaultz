@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"crypto"
 	"crypto/sha256"
 	"encoding/hex"
@@ -59,16 +58,6 @@ func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
 	ret, err := armor.Encode(writer, blockType, nil)
 	Check(err)
 	return ret
-}
-
-func ArmorInBytes(data []byte) string {
-	buf := new(bytes.Buffer)
-	func() {
-		writer := ArmorIn(buf, "PGP MESSAGE")
-		defer writer.Close()
-		writer.Write(data)
-	}()
-	return buf.String()
 }
 
 func GenerateKeyPair(name string) {
