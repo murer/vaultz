@@ -1,10 +1,11 @@
 #!/bin/bash -xe
 
 _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
+_vaultz_base="gen/vaultz"
 
 function cmd_prepare() {
-    rm -rf gen/vaultz || true
-    mkdir -p gen/vaultz
+    rm -rf "$_vaultz_base" || true
+    mkdir -p "$_vaultz_base"
 }
 
 function cmd_test_help() {
@@ -12,6 +13,7 @@ function cmd_test_help() {
 }
 
 function cmd_test_crypt() {
+    $_vaultz_bin keygen k1
     $_vaultz_bin encrypt sample/a1.secret.txt
     $_vaultz_bin decrypt sample/a1.secret.txt
 }
