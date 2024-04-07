@@ -8,11 +8,14 @@ import (
 )
 
 func main() {
-	const publicKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+	const publicKey = `
+----BEGIN PGP PUBLIC KEY BLOCK-----
 
-dGVzdA==
-=+G7Q
------END PGP PUBLIC KEY BLOCK-----`
+xk0EZhMdugECAOXnYV4Kxangww+e/berYrvmrwf38xuQ0OD5FNtKYpSuaq6bqNfn
+fhex9RZ4cuA4hXYK77yIqT2at+Ni8ss9nC0AEQEAAQ==
+=jXv/
+-----END PGP PUBLIC KEY BLOCK-----	
+`
 
 	// Convert the public key string to a reader
 	reader := strings.NewReader(publicKey)
