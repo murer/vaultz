@@ -100,7 +100,7 @@ func ReadKey(filename string) *openpgp.Entity {
 	if len(kr) != 1 {
 		log.Panicf("Too many keys: %d\n", len(kr))
 	}
-	log.Printf("Key read %s from %s", kr[0].PrimaryKey.KeyIdString(), filename)
+	log.Printf("Public key read %s from %s", kr[0].PrimaryKey.KeyIdString(), filename)
 	return kr[0]
 }
 
@@ -115,7 +115,7 @@ func ReadPubKeys() openpgp.EntityList {
 	return ret
 }
 
-func ReadPrivKey() {
+func ReadPrivKey() *openpgp.Entity {
 	filename := "gen/privkey/privkey.txt"
 	file, err := os.OpenFile(GetBaseFile(filename), os.O_RDONLY, os.ModePerm)
 	Check(err)
@@ -130,21 +130,22 @@ func ReadPrivKey() {
 	if len(kr) != 1 {
 		log.Panicf("Too many keys: %d\n", len(kr))
 	}
-	// log.Printf("Key read %s from %s", kr[0].PrimaryKey.KeyIdString(), filename)
-	// return kr[0]
+	log.Printf("Private key read %s from %s", kr[0].PrimaryKey.KeyIdString(), filename)
+	return kr[0]
 }
 
 func EncryptFile(filename string) {
 	destfilename := GetBlob(filename)
-	// pubkeys := ReadPubKeys()
-	ReadPrivKey()
+	pubkeys := ReadPubKeys()
+	privkey := ReadPrivKey()
 	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
 	Check(err)
-	(func() {
-		defer file.Close()
-		log.Printf("Encrypt: %s", destfilename)
-		// openpgp.Encrypt(file, pubkeys, )
-	})()
+	defer file.Close()
+	log.Printf("Encrypt: %s", destfilename)
+	writer, err := openpgp.Encrypt(file, pubkeys, privkey, nil, Config)
+	Check(err)
+	defer writer.Close()
+	writer.Write([]byte("Test"))
 }
 
 // ****************************************
