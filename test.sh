@@ -6,12 +6,13 @@ function cmd_help() {
     $_vaultz_bin "--help"
 }
 
-function cmd_basics() {
-    true
+function cmd_crypt() {
+    $_vaultz_bin encrypt sample/a1.secret.txt
+    $_vaultz_bin decrypt sample/a1.secret.txt
 }
 
 function cmd_all() {
-    cmd_basics
+    cmd_crypt
     cmd_help
 }
 
