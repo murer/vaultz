@@ -17,7 +17,7 @@ var Config = &packet.Config{
 	CompressionConfig: &packet.CompressionConfig{
 		Level: packet.BestCompression,
 	},
-	RSABits: 4096,
+	RSABits: 512,
 }
 
 func Check(err error) {
@@ -91,4 +91,38 @@ func main() {
 	buf.ReadFrom(msg.LiteralData.Body)
 	data := buf.String()
 	log.Printf("Decrypted: %s", data)
+
+	buf = new(bytes.Buffer)
+	log.Printf("Signing")
+	func() {
+		cwriter, err := openpgp.Sign(buf, fromKP, nil, Config)
+		Check(err)
+		defer cwriter.Close()
+		cwriter.Write([]byte("mymsg"))
+	}()
+
+	log.Printf("Signed: %x", buf.Bytes())
+
+	var keysFrom openpgp.EntityList
+	keysFrom = append(keysFrom, fromKP)
+
+	log.Printf("Decrypting")
+	reader = bytes.NewReader(buf.Bytes())
+	msg, err = openpgp.ReadMessage(reader, keysFrom, nil, Config)
+	Check(err)
+	log.Printf("isSigned: %v", msg.IsSigned)
+	log.Printf("SignatureError: %#v", msg.SignatureError)
+	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
+	log.Printf("SignedBy.KeyIdString: %s", msg.SignedBy.PublicKey.KeyIdString())
+	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
+	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey))
+	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
+	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
+	log.Printf("Signature: %#v", msg.Signature)
+	log.Printf("isEncrypted: %v", msg.IsEncrypted)
+	buf = &bytes.Buffer{}
+	buf.ReadFrom(msg.LiteralData.Body)
+	data = buf.String()
+	log.Printf("Decrypted: %s", data)
+
 }
