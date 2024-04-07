@@ -9,12 +9,12 @@ import (
 
 func main() {
 	const publicKey = `
-----BEGIN PGP PUBLIC KEY BLOCK-----
+-----BEGIN PGP PUBLIC KEY BLOCK-----
 
-xk0EZhMdugECAOXnYV4Kxangww+e/berYrvmrwf38xuQ0OD5FNtKYpSuaq6bqNfn
-fhex9RZ4cuA4hXYK77yIqT2at+Ni8ss9nC0AEQEAAQ==
-=jXv/
------END PGP PUBLIC KEY BLOCK-----	
+xk0EZhMdugECAKOAoGPxax0A2d518Pa0XfKU97JU4UrLXLCVtPs0aAT/5N22dgEe
+6aKhUrfQ3cFTGBqO6GZsym4V1bVjxBJR/7UAEQEAAQ==
+=Za+/
+-----END PGP PUBLIC KEY BLOCK----
 `
 
 	// Convert the public key string to a reader
