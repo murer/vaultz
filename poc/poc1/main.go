@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto"
+	"io"
 	"log"
 
 	"golang.org/x/crypto/openpgp"
@@ -26,12 +27,16 @@ func Check(err error) {
 	}
 }
 
-func ArmorIn(key *packet.PublicKey) string {
+func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
+	ret, err := armor.Encode(writer, openpgp.PublicKeyType, nil)
+	Check(err)
+	return ret
+}
 
+func ArmorInPublicKey(key *packet.PublicKey) string {
 	buf := new(bytes.Buffer)
 	func() {
-		writer, ret := armor.Encode(buf, openpgp.PublicKeyType, nil)
-		Check(ret)
+		writer := ArmorIn(buf, openpgp.PublicKeyType)
 		defer writer.Close()
 		key.Serialize(writer)
 	}()
@@ -42,17 +47,17 @@ func main() {
 	fromKP, err := openpgp.NewEntity("John1", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("From key pair: %v", fromKP.PrimaryKey.KeyIdString())
-	log.Println(ArmorIn(fromKP.PrimaryKey))
+	log.Println(ArmorInPublicKey(fromKP.PrimaryKey))
 
 	dstKP1, err := openpgp.NewEntity("John2", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("Dest key pair: %v", dstKP1.PrimaryKey.KeyIdString())
-	log.Println(ArmorIn(dstKP1.PrimaryKey))
+	log.Println(ArmorInPublicKey(dstKP1.PrimaryKey))
 
 	dstKP2, err := openpgp.NewEntity("John3", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("Dest key pair: %v", dstKP2.PrimaryKey.KeyIdString())
-	log.Println(ArmorIn(dstKP2.PrimaryKey))
+	log.Println(ArmorInPublicKey(dstKP2.PrimaryKey))
 
 	var dests openpgp.EntityList
 	dests = append(dests, dstKP1)
@@ -83,7 +88,7 @@ func main() {
 	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
 	log.Printf("SignedBy.KeyIdString: %s", msg.SignedBy.PublicKey.KeyIdString())
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
-	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey))
+	log.Printf("SignedBy.PublicKey: %s", ArmorInPublicKey(msg.SignedBy.PublicKey))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
 	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
@@ -113,7 +118,7 @@ func main() {
 	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
 	log.Printf("SignedBy.KeyIdString: %s", msg.SignedBy.PublicKey.KeyIdString())
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
-	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey))
+	log.Printf("SignedBy.PublicKey: %s", ArmorInPublicKey(msg.SignedBy.PublicKey))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
 	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
