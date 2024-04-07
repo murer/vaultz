@@ -73,8 +73,8 @@ func GenerateKeyPair(name string) {
 	pub, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PUB)
 	Check(err)
 	defer pub.Close()
-	apub := ArmorIn(pub, openpgp.PublicKeyType)
 	(func() {
+		apub := ArmorIn(pub, openpgp.PublicKeyType)
 		defer apub.Close()
 		kp.Serialize(apub)
 	})()
@@ -84,8 +84,8 @@ func GenerateKeyPair(name string) {
 	priv, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PRIV)
 	Check(err)
 	defer priv.Close()
-	apriv := ArmorIn(priv, openpgp.PrivateKeyType)
 	(func() {
+		apriv := ArmorIn(priv, openpgp.PrivateKeyType)
 		defer apriv.Close()
 		kp.SerializePrivate(apriv, Config)
 	})()
