@@ -26,10 +26,11 @@ func Check(err error) {
 	}
 }
 
-func ArmorIn(key *packet.PublicKey) string {
+func ArmorIn(key *packet.PublicKey, blockType string) string {
+
 	buf := new(bytes.Buffer)
 	func() {
-		writer, ret := armor.Encode(buf, openpgp.PublicKeyType, nil)
+		writer, ret := armor.Encode(buf, blockType, nil)
 		Check(ret)
 		defer writer.Close()
 		key.Serialize(writer)
@@ -41,17 +42,17 @@ func main() {
 	fromKP, err := openpgp.NewEntity("John1", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("From key pair: %v", fromKP.PrimaryKey.KeyIdString())
-	log.Println(ArmorIn(fromKP.PrimaryKey))
+	log.Println(ArmorIn(fromKP.PrimaryKey, openpgp.PublicKeyType))
 
 	dstKP1, err := openpgp.NewEntity("John2", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("Dest key pair: %v", dstKP1.PrimaryKey.KeyIdString())
-	log.Println(ArmorIn(dstKP1.PrimaryKey))
+	log.Println(ArmorIn(dstKP1.PrimaryKey, openpgp.PublicKeyType))
 
 	dstKP2, err := openpgp.NewEntity("John3", "Testing", "johndoe@example.com", Config)
 	Check(err)
 	log.Printf("Dest key pair: %v", dstKP2.PrimaryKey.KeyIdString())
-	log.Println(ArmorIn(dstKP2.PrimaryKey))
+	log.Println(ArmorIn(dstKP2.PrimaryKey, openpgp.PublicKeyType))
 
 	var dests openpgp.EntityList
 	dests = append(dests, dstKP1)
@@ -82,7 +83,7 @@ func main() {
 	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
 	log.Printf("SignedBy.KeyIdString: %s", msg.SignedBy.PublicKey.KeyIdString())
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
-	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey))
+	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey, openpgp.PublicKeyType))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
 	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
@@ -112,7 +113,7 @@ func main() {
 	log.Printf("SignedByKeyId: %x", msg.SignedByKeyId)
 	log.Printf("SignedBy.KeyIdString: %s", msg.SignedBy.PublicKey.KeyIdString())
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
-	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey))
+	log.Printf("SignedBy.PublicKey: %s", ArmorIn(msg.SignedBy.PublicKey, openpgp.PublicKeyType))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
 	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
