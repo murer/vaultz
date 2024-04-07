@@ -22,13 +22,13 @@ type HelpCommand struct {
 	cmds map[string]Command
 }
 
-func (me HelpCommand) Name() string { return "help" }
+func (me *HelpCommand) Name() string { return "help" }
 
-func (me HelpCommand) Flags() *flag.FlagSet {
+func (me *HelpCommand) Flags() *flag.FlagSet {
 	return flag.NewFlagSet(me.Name(), flag.ExitOnError)
 }
 
-func (me HelpCommand) Run(args []string) {
+func (me *HelpCommand) Run(args []string) {
 	me.Flags().Output().Write([]byte{10})
 	for _, cmd := range me.cmds {
 		cmd.Flags().Usage()
@@ -36,17 +36,25 @@ func (me HelpCommand) Run(args []string) {
 	}
 }
 
-type KeygenCommand struct{}
-
-func (me KeygenCommand) Name() string { return "keygen" }
-
-func (me KeygenCommand) Flags() *flag.FlagSet {
-	ret := flag.NewFlagSet(me.Name(), flag.ExitOnError)
-	return ret
+type KeygenCommand struct {
+	flags    *flag.FlagSet
+	flagName *string
 }
 
-func (me KeygenCommand) Run(args []string) {
+func (me *KeygenCommand) Name() string { return "keygen" }
 
+func (me *KeygenCommand) Flags() *flag.FlagSet {
+	if me.flags == nil {
+		me.flags = flag.NewFlagSet(me.Name(), flag.ExitOnError)
+		me.flagName = me.flags.String("name", "", "Key name")
+	}
+	return me.flags
+}
+
+func (me *KeygenCommand) Run(args []string) {
+	err := me.Flags().Parse(args)
+	Check(err)
+	log.Printf("Keygen name: %s\n", *me.flagName)
 }
 
 func createCommands() map[string]Command {
@@ -56,8 +64,8 @@ func createCommands() map[string]Command {
 			ret[element.Name()] = element
 		}
 	}([]Command{
-		HelpCommand{ret},
-		KeygenCommand{},
+		&HelpCommand{ret},
+		&KeygenCommand{},
 	})
 	return ret
 }
