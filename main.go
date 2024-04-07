@@ -19,6 +19,7 @@ type Command interface {
 }
 
 type HelpCommand struct {
+	cmds map[string]Command
 }
 
 func (me HelpCommand) Name() string {
@@ -40,7 +41,7 @@ func createCommands() map[string]Command {
 			ret[element.Name()] = element
 		}
 	}([]Command{
-		HelpCommand{},
+		HelpCommand{ret},
 	})
 	return ret
 }
