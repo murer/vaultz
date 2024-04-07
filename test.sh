@@ -27,8 +27,8 @@ function cmd_test_crypt() {
 }
 
 function cmd_all() {
-    cmd_test_crypt
     cmd_test_help
+    cmd_test_crypt
 }
 
 cmd_prepare
