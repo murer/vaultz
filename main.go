@@ -118,31 +118,11 @@ func ReadPubKeys() openpgp.EntityList {
 	return ret
 }
 
-func ReadPrivKey() *openpgp.Entity {
-	filename := GetBaseFile("gen/privkey/privkey.txt")
-	// file, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
-	// Check(err)
-	// defer file.Close()
-	// block, err := armor.Decode(file)
-	// Check(err)
-	// if block.Type != "PGP PRIVATE KEY BLOCK" {
-	// 	log.Panicf("Wrong key: %s (%s)\n", filename, block.Type)
-	// }
-	// kr, err := openpgp.ReadKeyRing(block.Body)
-	// Check(err)
-	// if len(kr) != 1 {
-	// 	log.Panicf("Too many keys: %d\n", len(kr))
-	// }
-	// log.Printf("Private key read %s from %s", kr[0].PrimaryKey.KeyIdString(), filename)
-	// return kr[0]
-	return ReadKey(filename)
-}
-
 func EncryptFile(filename string) {
 	destfilename := GetBlob(filename)
 	log.Printf("Encrypt %s: %s", filename, destfilename)
 	pubkeys := ReadPubKeys()
-	privkey := ReadPrivKey()
+	privkey := ReadKey(GetBaseFile("gen/privkey/privkey.txt"))
 	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
 	Check(err)
 	defer file.Close()
