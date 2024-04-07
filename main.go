@@ -22,7 +22,7 @@ func createCommands() map[string]*Command {
 			ret[element.Name] = &element
 		}
 	}([]Command{
-		Command{"help"},
+		{"help"},
 	})
 	return ret
 }
