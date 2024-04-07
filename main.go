@@ -151,13 +151,13 @@ func EncryptFile(filename string) {
 	defer destfile.Close()
 	adestfile := ArmorIn(destfile, "PGP MESSAGE")
 	defer adestfile.Close()
-	writer, err := openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
+	_, err = openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
 	Check(err)
-	(func() {
-		defer writer.Close()
-		writer.Write([]byte("Test"))
-	})()
-	destfile.Write([]byte{10})
+	// (func() {
+	// 	defer writer.Close()
+	// 	writer.Write([]byte("Test"))
+	// })()
+	// destfile.Write([]byte{10})
 }
 
 // ****************************************
