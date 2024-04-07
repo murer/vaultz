@@ -19,8 +19,9 @@ type Command interface {
 }
 
 type BaseCommand struct {
-	Name string
-	Cmds map[string]Command
+	Name    string
+	Cmds    map[string]Command
+	FlagSet *flag.FlagSet
 }
 
 func (me *BaseCommand) GetName() string {
@@ -57,6 +58,7 @@ func (me *KeygenCommand) Run() {
 
 func (me *KeygenCommand) PrepareFlags(flags *flag.FlagSet) {
 	me.FlagName = flags.String("name", "", "Key name")
+	me.FlagSet = flags
 }
 
 func createCommands() map[string]Command {
@@ -67,8 +69,8 @@ func createCommands() map[string]Command {
 			ret[cmd.GetName()] = cmd
 		}
 	})([]Command{
-		&HelpCommand{BaseCommand: BaseCommand{"help", ret}},
-		&KeygenCommand{BaseCommand: BaseCommand{"keygen", ret}},
+		&HelpCommand{BaseCommand: BaseCommand{"help", ret, nil}},
+		&KeygenCommand{BaseCommand: BaseCommand{"keygen", ret, nil}},
 	})
 	return ret
 }
