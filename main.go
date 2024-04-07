@@ -32,7 +32,7 @@ func (me HelpCommand) Flags() *flag.FlagSet {
 }
 
 func (me HelpCommand) ArgsUsage() string {
-	return "[command]"
+	return ""
 }
 
 func (me HelpCommand) Run(args []string) {
