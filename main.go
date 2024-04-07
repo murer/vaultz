@@ -94,6 +94,10 @@ func GenerateKeyPair(name string) {
 	})()
 }
 
+func EncryptFile(filename string) {
+
+}
+
 // ****************************************
 
 type Command interface {
@@ -159,15 +163,15 @@ func (me *KeygenCommand) PrepareFlags(flags *flag.FlagSet) {
 
 type EncryptCommand struct {
 	BaseCommand
-	FlagName *string
+	FlagFile *string
 }
 
 func (me *EncryptCommand) Run() {
-
+	EncryptFile(me.FlagFile)
 }
 
 func (me *EncryptCommand) PrepareFlags(flags *flag.FlagSet) {
-	me.FlagName = flags.String("file", "", "File to be encrypted")
+	me.FlagFile = flags.String("file", "", "File to be encrypted")
 	me.FlagSet = flags
 }
 
