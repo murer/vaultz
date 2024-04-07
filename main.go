@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 )
 
@@ -11,13 +11,32 @@ func Check(err error) {
 	}
 }
 
+type Command struct {
+	Name string
+}
+
+func createCommands() map[string]*Command {
+	ret := make(map[string]*Command)
+	func(cmds []Command) {
+		for _, element := range cmds {
+			ret[element.Name] = &element
+		}
+	}([]Command{
+		Command{"help"},
+	})
+	return ret
+}
+
 func parseCommands(args []string) {
+	commands := createCommands()
 	subcommand := "help"
 	if len(args) >= 2 {
 		subcommand = args[1]
-		args = args[1:]
+		args = args[2:]
 	}
-	fmt.Println(subcommand)
+	log.Printf("Command: %s, args: %s\n", subcommand, args)
+	command := commands[subcommand]
+	log.Printf("AAA: %#v\n", command)
 }
 
 func main() {
