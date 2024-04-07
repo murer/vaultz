@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 )
@@ -11,8 +12,22 @@ func Check(err error) {
 	}
 }
 
-type Command struct {
-	Name string
+type Command interface {
+	Name() string
+	Flags() *flag.FlagSet
+	Run(args []string)
+}
+
+func (me *Command) Flags() *flag.FlagSet {
+	return flag.NewFlagSet(me.Name, flag.ExitOnError)
+}
+
+func (me *Command) Run(args []string) {
+
+}
+
+type HelpCommand struct {
+	Command
 }
 
 func createCommands() map[string]*Command {
@@ -22,7 +37,7 @@ func createCommands() map[string]*Command {
 			ret[element.Name] = &element
 		}
 	}([]Command{
-		{"help"},
+		&HelpCommand{},
 	})
 	return ret
 }
@@ -39,7 +54,6 @@ func parseCommands(args []string) {
 	if command == nil {
 		log.Panicf("Wrong command: %s, try to use help", subcommand)
 	}
-	log.Printf("AAA: %#v\n", command)
 }
 
 func main() {
