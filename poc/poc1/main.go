@@ -103,12 +103,9 @@ func main() {
 
 	log.Printf("Signed: %x", buf.Bytes())
 
-	var keysFrom openpgp.EntityList
-	keysFrom = append(keysFrom, fromKP)
-
 	log.Printf("Decrypting")
 	reader = bytes.NewReader(buf.Bytes())
-	msg, err = openpgp.ReadMessage(reader, keysFrom, nil, Config)
+	msg, err = openpgp.ReadMessage(reader, keys, nil, Config)
 	Check(err)
 	log.Printf("isSigned: %v", msg.IsSigned)
 	log.Printf("SignatureError: %#v", msg.SignatureError)
