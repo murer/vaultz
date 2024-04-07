@@ -31,7 +31,11 @@ func (me HelpCommand) Flags() *flag.FlagSet {
 }
 
 func (me HelpCommand) Run(args []string) {
-
+	me.Flags().Output().Write([]byte{10})
+	for _, cmd := range me.cmds {
+		cmd.Flags().Usage()
+		cmd.Flags().Output().Write([]byte{10})
+	}
 }
 
 func createCommands() map[string]Command {
@@ -58,6 +62,7 @@ func parseCommands(args []string) {
 	if command == nil {
 		log.Panicf("Wrong command: %s, try to use help", subcommand)
 	}
+	command.Run(args)
 }
 
 func main() {
