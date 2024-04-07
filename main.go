@@ -268,6 +268,7 @@ func createCommands() map[string]Command {
 		&HelpCommand{BaseCommand: BaseCommand{"help", ret, nil}},
 		&KeygenCommand{BaseCommand: BaseCommand{"keygen", ret, nil}},
 		&EncryptCommand{BaseCommand: BaseCommand{"encrypt", ret, nil}},
+		&DecryptCommand{BaseCommand: BaseCommand{"decrypt", ret, nil}},
 	})
 	return ret
 }
