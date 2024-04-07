@@ -33,6 +33,16 @@ func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
 	return ret
 }
 
+func ArmorInBytes(data []byte) string {
+	buf := new(bytes.Buffer)
+	func() {
+		writer := ArmorIn(buf, openpgp.PublicKeyType)
+		defer writer.Close()
+		writer.Write(data)
+	}()
+	return buf.String()
+}
+
 func ArmorInPublicKey(key *packet.PublicKey) string {
 	buf := new(bytes.Buffer)
 	func() {
@@ -72,7 +82,7 @@ func main() {
 		cwriter.Write([]byte("mymsg"))
 	}()
 
-	log.Printf("Encrypted: %x", buf.Bytes())
+	log.Printf("Encrypted: %s", ArmorInBytes(buf.Bytes()))
 
 	var keys openpgp.EntityList
 	keys = append(keys, dstKP1)
