@@ -22,7 +22,8 @@ function cmd_test_crypt() {
     $_vaultz_bin keygen --name kwriter
 
     $_vaultz_bin encrypt --file target/test/sample/a.secret.txt
-    $_vaultz_bin decrypt --file target/test/sample/b.secret.txt
+
+    $_vaultz_bin decrypt --file target/test/sample/a.secret.txt
 }
 
 function cmd_all() {
