@@ -34,7 +34,7 @@ func (me HelpCommand) Run(args []string) {
 	me.Flags().Output().Write([]byte{10})
 	for _, cmd := range me.cmds {
 		cmd.Flags().Usage()
-		cmd.Flags().Output().Write([]byte{10})
+		os.Stdout.Write([]byte{10})
 	}
 }
 
