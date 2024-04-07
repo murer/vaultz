@@ -172,7 +172,6 @@ func handleCommands(args []string) {
 		subcommand = args[1]
 		args = args[2:]
 	}
-	log.Printf("Command: %s, args: %s\n", subcommand, args)
 	command := commands[subcommand]
 	if command == nil {
 		log.Panicf("Wrong command: %s, try to use help", subcommand)
