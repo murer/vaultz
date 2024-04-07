@@ -76,7 +76,6 @@ func GenerateKeyPair(name string) {
 		})()
 		writer.Write([]byte{10})
 	})()
-	// log.Println(ArmorInPublicKey(fromKP.PrimaryKey))
 }
 
 // ****************************************
