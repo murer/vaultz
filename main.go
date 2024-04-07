@@ -43,8 +43,7 @@ func parseCommands() map[string]Command {
 			ret[cmd.Name()] = cmd
 		}
 	})([]Command{
-		&BaseCommand{},
-		&HelpCommand{},
+		&HelpCommand{BaseCommand{"help"}},
 	})
 	return ret
 }
