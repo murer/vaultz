@@ -52,6 +52,11 @@ func SHA256(data []byte) string {
 	return strings.ToLower(hex.EncodeToString(hash[:]))
 }
 
+func GetBlob(filename string) string {
+	hash := SHA256([]byte(filename))
+	return GetBaseFile(filepath.Join("gen/blob", fmt.Sprintf("%s.secret.txt", hash)))
+}
+
 func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
 	ret, err := armor.Encode(writer, blockType, nil)
 	Check(err)
@@ -111,13 +116,13 @@ func ReadPubKeys() openpgp.EntityList {
 }
 
 func EncryptFile(filename string) {
-	// destfilename := SHA256([]byte(filename))
-	ReadPubKeys()
+	destfilename := GetBlob(filename)
+	// pubkeys := ReadPubKeys()
 	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
 	Check(err)
 	(func() {
 		defer file.Close()
-
+		log.Printf("Encrypt: %s", destfilename)
 	})()
 }
 
