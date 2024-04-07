@@ -79,6 +79,19 @@ func GenerateKeyPair(name string) {
 		})()
 		writer.Write([]byte{10})
 	})()
+
+	file = GetBaseFile("gen/privkey/privkey.txt")
+	writer, err = os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PRIV)
+	Check(err)
+	(func() {
+		defer writer.Close()
+		(func() {
+			awriter := ArmorIn(writer, openpgp.PrivateKeyType)
+			defer awriter.Close()
+			kp.PrivateKey.Serialize(awriter)
+		})()
+		writer.Write([]byte{10})
+	})()
 }
 
 // ****************************************
