@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 )
@@ -14,41 +13,41 @@ func Check(err error) {
 
 func parseCommands(args []string) {
 	subcommand := "help"
-	if len(args) <= 1 {
-		subcommand = args[0]
+	if len(args) >= 2 {
+		subcommand = args[1]
 		args = args[1:]
 	}
-	fmt.Printf(subcommand)
+	fmt.Println(subcommand)
 }
 
 func main() {
 	parseCommands(os.Args)
-	if len(os.Args) < 2 {
-		fmt.Println("Expected a subcommand")
-		os.Exit(1)
-	}
+	// if len(os.Args) < 2 {
+	// 	fmt.Println("Expected a subcommand")
+	// 	os.Exit(1)
+	// }
 
-	// Subcommands
-	serveCmd := flag.NewFlagSet("serve", flag.ExitOnError)
-	servePort := serveCmd.Int("port", 8080, "Port to run the server on")
+	// // Subcommands
+	// serveCmd := flag.NewFlagSet("serve", flag.ExitOnError)
+	// servePort := serveCmd.Int("port", 8080, "Port to run the server on")
 
-	migrateCmd := flag.NewFlagSet("migrate", flag.ExitOnError)
-	migrateDir := migrateCmd.String("dir", "./migrations", "Directory with migration files")
+	// migrateCmd := flag.NewFlagSet("migrate", flag.ExitOnError)
+	// migrateDir := migrateCmd.String("dir", "./migrations", "Directory with migration files")
 
-	// Check which subcommand is invoked
-	switch os.Args[1] {
-	case "serve":
-		// Parse flags for the 'serve' subcommand
-		serveCmd.Parse(os.Args[2:])
-		fmt.Printf("Serving on port %d...\n", *servePort)
+	// // Check which subcommand is invoked
+	// switch os.Args[1] {
+	// case "serve":
+	// 	// Parse flags for the 'serve' subcommand
+	// 	serveCmd.Parse(os.Args[2:])
+	// 	fmt.Printf("Serving on port %d...\n", *servePort)
 
-	case "migrate":
-		// Parse flags for the 'migrate' subcommand
-		migrateCmd.Parse(os.Args[2:])
-		fmt.Printf("Running migrations from directory '%s'...\n", *migrateDir)
+	// case "migrate":
+	// 	// Parse flags for the 'migrate' subcommand
+	// 	migrateCmd.Parse(os.Args[2:])
+	// 	fmt.Printf("Running migrations from directory '%s'...\n", *migrateDir)
 
-	default:
-		fmt.Println("Expected 'serve' or 'migrate' subcommands")
-		os.Exit(1)
-	}
+	// default:
+	// 	fmt.Println("Expected 'serve' or 'migrate' subcommands")
+	// 	os.Exit(1)
+	// }
 }
