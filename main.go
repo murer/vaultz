@@ -15,6 +15,9 @@ import (
 	"golang.org/x/crypto/openpgp/packet"
 )
 
+const F_PUB = 0644
+const F_PRIV = 0600
+
 func GetBaseFile(filename string) string {
 	base := os.Getenv("VAULTZ_BASE")
 	if base == "" {
@@ -65,7 +68,7 @@ func GenerateKeyPair(name string) {
 	Check(err)
 	log.Printf("Generating key %s: %s\n", name, kp.PrimaryKey.KeyIdString())
 	file := GetBaseFile(fmt.Sprintf("pubkey/%s.pubkey.txt", name))
-	writer, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	writer, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, F_PUB)
 	Check(err)
 	(func() {
 		defer writer.Close()
