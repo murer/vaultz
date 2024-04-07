@@ -28,7 +28,7 @@ func Check(err error) {
 }
 
 func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
-	ret, err := armor.Encode(writer, openpgp.PublicKeyType, nil)
+	ret, err := armor.Encode(writer, blockType, nil)
 	Check(err)
 	return ret
 }
@@ -36,7 +36,7 @@ func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
 func ArmorInBytes(data []byte) string {
 	buf := new(bytes.Buffer)
 	func() {
-		writer := ArmorIn(buf, openpgp.PublicKeyType)
+		writer := ArmorIn(buf, "PGP MESSAGE")
 		defer writer.Close()
 		writer.Write(data)
 	}()
@@ -100,7 +100,7 @@ func main() {
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
 	log.Printf("SignedBy.PublicKey: %s", ArmorInPublicKey(msg.SignedBy.PublicKey))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
-	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
+	log.Printf("IsSymmetricallyEncrypted: %v", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
@@ -117,7 +117,7 @@ func main() {
 		cwriter.Write([]byte("mymsg"))
 	}()
 
-	log.Printf("Signed: %x", buf.Bytes())
+	log.Printf("Signed: %s", ArmorInBytes(buf.Bytes()))
 
 	log.Printf("Decrypting")
 	reader = bytes.NewReader(buf.Bytes())
@@ -130,7 +130,7 @@ func main() {
 	log.Printf("SignedBy.Fingerprint: %x", msg.SignedBy.PublicKey.Fingerprint)
 	log.Printf("SignedBy.PublicKey: %s", ArmorInPublicKey(msg.SignedBy.PublicKey))
 	// log.Printf("SignedByKeyId: %v", msg.SignedBy.PrivateKey)
-	log.Printf("IsSymmetricallyEncrypted: %b", msg.IsSymmetricallyEncrypted)
+	log.Printf("IsSymmetricallyEncrypted: %v", msg.IsSymmetricallyEncrypted)
 	log.Printf("Signature: %#v", msg.Signature)
 	log.Printf("isEncrypted: %v", msg.IsEncrypted)
 	buf = &bytes.Buffer{}
