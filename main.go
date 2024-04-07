@@ -102,8 +102,23 @@ func GenerateKeyPair(name string) {
 	})()
 }
 
+func ReadKey(filename string) {
+	log.Printf("aaaa: %s\n", filename)
+	os.OpenFile(filename)
+}
+
+func ReadPubKeys() {
+	dir := GetBaseFile("pubkey")
+	files, err := os.ReadDir(dir)
+	Check(err)
+	for _, file := range files {
+		ReadKey(filepath.Join(dir, file.Name()))
+	}
+}
+
 func EncryptFile(filename string) {
-	destfilename := SHA256([]byte(filename))
+	// destfilename := SHA256([]byte(filename))
+	ReadPubKeys()
 	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
 	Check(err)
 	(func() {
