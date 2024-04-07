@@ -72,8 +72,10 @@ func GenerateKeyPair(name string) {
 	Check(err)
 	defer pub.Close()
 	apub := ArmorIn(pub, openpgp.PublicKeyType)
-	defer apub.Close()
-	kp.Serialize(apub)
+	(func() {
+		defer apub.Close()
+		kp.Serialize(apub)
+	})()
 	pub.Write([]byte{10})
 
 	file = GetBaseFile("gen/privkey/privkey.txt")
@@ -81,8 +83,10 @@ func GenerateKeyPair(name string) {
 	Check(err)
 	defer priv.Close()
 	apriv := ArmorIn(priv, openpgp.PrivateKeyType)
-	defer apriv.Close()
-	kp.SerializePrivate(apriv, Config)
+	(func() {
+		defer apriv.Close()
+		kp.SerializePrivate(apriv, Config)
+	})()
 	priv.Write([]byte{10})
 }
 
@@ -149,8 +153,11 @@ func EncryptFile(filename string) {
 	defer adestfile.Close()
 	writer, err := openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
 	Check(err)
-	defer writer.Close()
-	writer.Write([]byte("Test"))
+	(func() {
+		defer writer.Close()
+		writer.Write([]byte("Test"))
+	})()
+	destfile.Write([]byte{10})
 }
 
 // ****************************************
