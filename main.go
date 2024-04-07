@@ -40,7 +40,7 @@ func parseCommands() map[string]Command {
 	ret := make(map[string]Command)
 	(func(cmds []Command) {
 		for _, cmd := range cmds {
-
+			ret[cmd.Name()] = cmd
 		}
 	})([]Command{
 		&BaseCommand{},
