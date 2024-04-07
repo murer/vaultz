@@ -1,15 +1,29 @@
 package main
 
 import (
+	"bytes"
 	"crypto"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
 )
+
+func GetBaseFile(filename string) string {
+	base := os.Getenv("VAULTZ_BASE")
+	if base == "" {
+		log.Panic("VAULTZ_BASE is required")
+	}
+	ret := filepath.Join(base, filename)
+	dir := filepath.Dir(ret)
+	os.MkdirAll(dir, os.ModePerm)
+}
 
 func Check(err error) {
 	if err != nil {
@@ -29,10 +43,27 @@ func Config() *packet.Config {
 	}
 }
 
+func ArmorIn(writer io.Writer, blockType string) io.WriteCloser {
+	ret, err := armor.Encode(writer, blockType, nil)
+	Check(err)
+	return ret
+}
+
+func ArmorInBytes(data []byte) string {
+	buf := new(bytes.Buffer)
+	func() {
+		writer := ArmorIn(buf, "PGP MESSAGE")
+		defer writer.Close()
+		writer.Write(data)
+	}()
+	return buf.String()
+}
+
 func GenerateKeyPair(name string) {
 	kp, err := openpgp.NewEntity(name, name, fmt.Sprintf("%s@any", name), Config())
 	Check(err)
 	log.Printf("Generating key %s: %s\n", name, kp.PrimaryKey.KeyIdString())
+	GetBaseFile(fmt.Sprintf("pubkey/%s.pubkey.txt", name))
 	// log.Println(ArmorInPublicKey(fromKP.PrimaryKey))
 }
 
