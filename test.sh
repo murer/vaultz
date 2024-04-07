@@ -3,8 +3,8 @@
 _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
 
 function cmd_prepare() {
-    rm -rf test/vaultz || true
-    mkdir -p test/vaultz
+    rm -rf gen/vaultz || true
+    mkdir -p gen/vaultz
 }
 
 function cmd_test_help() {
