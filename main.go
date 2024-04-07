@@ -30,6 +30,7 @@ func (me *BaseCommand) GetName() string {
 }
 
 func (me *BaseCommand) PrepareFlags(flags *flag.FlagSet) {
+	me.FlagSet = flags
 }
 
 func (me *BaseCommand) Run() {
