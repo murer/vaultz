@@ -15,7 +15,6 @@ func Check(err error) {
 type Command interface {
 	Name() string
 	Flags() *flag.FlagSet
-	ArgsUsage() string
 	Run(args []string)
 }
 
@@ -29,10 +28,6 @@ func (me HelpCommand) Name() string {
 
 func (me HelpCommand) Flags() *flag.FlagSet {
 	return flag.NewFlagSet(me.Name(), flag.ExitOnError)
-}
-
-func (me HelpCommand) ArgsUsage() string {
-	return ""
 }
 
 func (me HelpCommand) Run(args []string) {
