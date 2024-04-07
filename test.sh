@@ -13,7 +13,7 @@ function cmd_prepare() {
 }
 
 function cmd_test_help() {
-    $_vaultz_bin "--help"
+    $_vaultz_bin "help"
 }
 
 function cmd_test_crypt() {
