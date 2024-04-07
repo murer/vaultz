@@ -18,26 +18,29 @@ type Command interface {
 	Run(args []string)
 }
 
-func (me *Command) Flags() *flag.FlagSet {
-	return flag.NewFlagSet(me.Name, flag.ExitOnError)
-}
-
-func (me *Command) Run(args []string) {
-
-}
-
 type HelpCommand struct {
-	Command
 }
 
-func createCommands() map[string]*Command {
-	ret := make(map[string]*Command)
+func (me HelpCommand) Name() string {
+	return "help"
+}
+
+func (me HelpCommand) Flags() *flag.FlagSet {
+	return flag.NewFlagSet(me.Name(), flag.ExitOnError)
+}
+
+func (me HelpCommand) Run(args []string) {
+
+}
+
+func createCommands() map[string]Command {
+	ret := make(map[string]Command)
 	func(cmds []Command) {
 		for _, element := range cmds {
-			ret[element.Name] = &element
+			ret[element.Name()] = element
 		}
 	}([]Command{
-		&HelpCommand{},
+		HelpCommand{},
 	})
 	return ret
 }
