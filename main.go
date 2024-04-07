@@ -15,6 +15,7 @@ func Check(err error) {
 type Command interface {
 	Name() string
 	Flags() *flag.FlagSet
+	ArgsUsage() string
 	Run(args []string)
 }
 
@@ -30,11 +31,16 @@ func (me HelpCommand) Flags() *flag.FlagSet {
 	return flag.NewFlagSet(me.Name(), flag.ExitOnError)
 }
 
+func (me HelpCommand) ArgsUsage() string {
+	return "[command]"
+}
+
 func (me HelpCommand) Run(args []string) {
 	me.Flags().Output().Write([]byte{10})
 	for _, cmd := range me.cmds {
 		cmd.Flags().Usage()
-		os.Stdout.Write([]byte{10})
+		cmd.Flags().Output().Write([]byte(me.ArgsUsage()))
+		os.Stdout.Write([]byte{10, 10})
 	}
 }
 
