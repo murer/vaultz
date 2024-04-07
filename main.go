@@ -163,7 +163,7 @@ type EncryptCommand struct {
 }
 
 func (me *EncryptCommand) Run() {
-	GenerateKeyPair(*me.FlagName)
+
 }
 
 func (me *EncryptCommand) PrepareFlags(flags *flag.FlagSet) {
