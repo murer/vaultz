@@ -140,6 +140,28 @@ func EncryptFile(filename string) {
 	destfile.Write([]byte{10})
 }
 
+func DecryptFile(filename string) {
+	destfilename := GetBlob(filename)
+	log.Printf("Encrypt %s: %s", filename, destfilename)
+	pubkeys := ReadPubKeys()
+	privkey := ReadKey(GetBaseFile("gen/privkey/privkey.txt"))
+	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
+	Check(err)
+	defer file.Close()
+	destfile, err := os.OpenFile(destfilename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PUB)
+	Check(err)
+	defer destfile.Close()
+	(func() {
+		adestfile := ArmorIn(destfile, "PGP MESSAGE")
+		defer adestfile.Close()
+		writer, err := openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
+		Check(err)
+		defer writer.Close()
+		writer.Write([]byte("Test"))
+	})()
+	destfile.Write([]byte{10})
+}
+
 // ****************************************
 
 type Command interface {
@@ -210,11 +232,26 @@ type EncryptCommand struct {
 
 func (me *EncryptCommand) Run() {
 	EncryptFile(*me.FlagFile)
-	log.Println("aaaaa")
 }
 
 func (me *EncryptCommand) PrepareFlags(flags *flag.FlagSet) {
 	me.FlagFile = flags.String("file", "", "File to be encrypted")
+	me.FlagSet = flags
+}
+
+// ****************************************
+
+type DecryptCommand struct {
+	BaseCommand
+	FlagFile *string
+}
+
+func (me *DecryptCommand) Run() {
+	DecryptFile(*me.FlagFile)
+}
+
+func (me *DecryptCommand) PrepareFlags(flags *flag.FlagSet) {
+	me.FlagFile = flags.String("file", "", "File to be decrypted")
 	me.FlagSet = flags
 }
 
