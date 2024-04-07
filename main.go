@@ -22,9 +22,7 @@ type HelpCommand struct {
 	cmds map[string]Command
 }
 
-func (me HelpCommand) Name() string {
-	return "help"
-}
+func (me HelpCommand) Name() string { return "help" }
 
 func (me HelpCommand) Flags() *flag.FlagSet {
 	return flag.NewFlagSet(me.Name(), flag.ExitOnError)
@@ -38,6 +36,19 @@ func (me HelpCommand) Run(args []string) {
 	}
 }
 
+type KeygenCommand struct{}
+
+func (me KeygenCommand) Name() string { return "keygen" }
+
+func (me KeygenCommand) Flags() *flag.FlagSet {
+	ret := flag.NewFlagSet(me.Name(), flag.ExitOnError)
+	return ret
+}
+
+func (me KeygenCommand) Run(args []string) {
+
+}
+
 func createCommands() map[string]Command {
 	ret := make(map[string]Command)
 	func(cmds []Command) {
@@ -46,6 +57,7 @@ func createCommands() map[string]Command {
 		}
 	}([]Command{
 		HelpCommand{ret},
+		KeygenCommand{},
 	})
 	return ret
 }

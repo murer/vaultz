@@ -14,9 +14,9 @@ function cmd_test_help() {
 }
 
 function cmd_test_crypt() {
-    $_vaultz_bin keygen kreader1
-    $_vaultz_bin keygen kreader2
-    $_vaultz_bin keygen kwriter
+    $_vaultz_bin keygen --name kreader1
+    $_vaultz_bin keygen --name kreader2
+    $_vaultz_bin keygen --name kwriter
 
     $_vaultz_bin encrypt sample/a.secret.txt
     $_vaultz_bin decrypt sample/b.secret.txt
