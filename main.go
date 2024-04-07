@@ -81,34 +81,32 @@ func GenerateKeyPair(name string) {
 	priv.Write([]byte{10})
 }
 
-func ReadKey(filename string) {
+func ReadKey(filename string) *openpgp.Entity {
 	file, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
 	Check(err)
 	defer file.Close()
 	block, err := armor.Decode(file)
 	Check(err)
 	if block.Type != "PGP PUBLIC KEY BLOCK" {
-		log.Panicf("Wrong key: %s", filename)
+		log.Panicf("Wrong key: %s\n", filename)
 	}
-	// kr, err := openpgp.ReadArmoredKeyRing(file)
 	kr, err := openpgp.ReadKeyRing(block.Body)
 	Check(err)
-	log.Printf("kkk: %v\n", kr)
-
-	// packets := packet.NewReader(block.Body)
-	// x, err := openpgp.ReadEntity(packets)
-	// Check(err)
-	// log.Printf("kkk: %v\n", x)
-
+	if len(kr) != 1 {
+		log.Panicf("Too many keys: %d\n", len(kr))
+	}
+	return kr[0]
 }
 
-func ReadPubKeys() {
+func ReadPubKeys() openpgp.EntityList {
 	dir := GetBaseFile("pubkey")
 	files, err := os.ReadDir(dir)
 	Check(err)
+	var ret openpgp.EntityList
 	for _, file := range files {
-		ReadKey(filepath.Join(dir, file.Name()))
+		ret = append(ret, ReadKey(filepath.Join(dir, file.Name())))
 	}
+	return ret
 }
 
 func EncryptFile(filename string) {
