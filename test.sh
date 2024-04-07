@@ -2,11 +2,11 @@
 
 _vaultz_bin="${VAULTZ_BIN:-go run main.go}"
 
-export _vaultz_base="gen/vaultz"
+export _vaultz_base="gen/test/vaultz"
 
 function cmd_prepare() {
-    rm -rf "$_vaultz_base" || true
-    mkdir -p "$_vaultz_base"
+    rm -rf "gen/test" || true
+    mkdir -p "gen/test"
 }
 
 function cmd_test_help() {
@@ -14,9 +14,13 @@ function cmd_test_help() {
 }
 
 function cmd_test_crypt() {
-    $_vaultz_bin keygen k1
-    $_vaultz_bin encrypt sample/a1.secret.txt
-    $_vaultz_bin decrypt sample/a1.secret.txt
+    $_vaultz_bin keygen kreader1
+    $_vaultz_bin keygen kreader2
+    $_vaultz_bin keygen kwriter
+
+    
+    $_vaultz_bin encrypt sample/a.secret.txt
+    $_vaultz_bin decrypt sample/b.secret.txt
 }
 
 function cmd_test_vault() {
