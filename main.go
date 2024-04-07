@@ -100,8 +100,12 @@ func GenerateKeyPair(name string) {
 
 func ReadKey(filename string) {
 	log.Printf("aaaa: %s\n", filename)
-	// file, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
-	// Check(err)
+	file, err := os.OpenFile(filename, os.O_RDONLY, os.ModePerm)
+	Check(err)
+	defer file.Close()
+	kr, err := openpgp.ReadArmoredKeyRing(file)
+	Check(err)
+	log.Printf("kkk: %v\n", kr)
 }
 
 func ReadPubKeys() {
