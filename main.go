@@ -218,6 +218,7 @@ type EncryptCommand struct {
 
 func (me *EncryptCommand) Run() {
 	EncryptFile(*me.FlagFile)
+	log.Println("aaaaa")
 }
 
 func (me *EncryptCommand) PrepareFlags(flags *flag.FlagSet) {
