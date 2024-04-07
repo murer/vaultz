@@ -21,7 +21,7 @@ dGVzdA==
 		panic(err)
 	}
 	fmt.Println(x.Type)
-	y, err := openpgp.ReadKeyRing(buf)
+	y, err := openpgp.ReadKeyRing(x.Body)
 	if err != nil {
 		panic(err)
 	}
