@@ -141,7 +141,7 @@ func EncryptFile(filename string) {
 		writer, err := openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
 		Check(err)
 		defer writer.Close()
-		writer.Write([]byte("Test"))
+		io.Copy(writer, file)
 	})()
 	destfile.Write([]byte{10})
 }
