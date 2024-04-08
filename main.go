@@ -165,9 +165,9 @@ func DecryptFile(filename string) {
 	}
 	msg, err := openpgp.ReadMessage(areader.Body, kr, nil, Config)
 	Check(err)
-	Validate(msg.IsSigned, "Message is not signed")
 	Validate(msg.IsEncrypted, "Message it not encrypted")
 	Validate(!msg.IsSymmetricallyEncrypted, "Message is symmetrically encrypted")
+	Validate(msg.IsSigned, "Message is not signed")
 	Validate(len(pubkeys.KeysById(msg.SignedBy.PublicKey.KeyId)) > 0, "Message is not signed by any known key: %s", msg.SignedBy.PublicKey.KeyIdString())
 }
 
