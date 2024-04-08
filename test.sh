@@ -21,9 +21,11 @@ function cmd_test_crypt() {
     $_vaultz_bin keygen --name kreader2
     $_vaultz_bin keygen --name kwriter
 
+    echo aaavalue | diff - target/test/sample/a.secret.txt
     $_vaultz_bin encrypt --file target/test/sample/a.secret.txt
 
     $_vaultz_bin decrypt --file target/test/sample/a.secret.txt
+    echo aaavalue | diff - target/test/sample/a.secret.txt
 }
 
 function cmd_all() {
