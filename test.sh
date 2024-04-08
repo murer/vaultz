@@ -23,7 +23,7 @@ function cmd_test_crypt() {
 
     echo aaavalue | diff - target/test/sample/a.secret.txt
     $_vaultz_bin encrypt --file target/test/sample/a.secret.txt
-
+    
     $_vaultz_bin decrypt --file target/test/sample/a.secret.txt
     echo aaavalue | diff - target/test/sample/a.secret.txt
 }
