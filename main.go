@@ -32,6 +32,12 @@ var Config = &packet.Config{
 	RSABits: 512,
 }
 
+func Validate(c bool, msg string, v ...any) {
+	if !c {
+		log.Panicf(msg, v...)
+	}
+}
+
 func GetBaseFile(filename string) string {
 	base := os.Getenv("VAULTZ_BASE")
 	if base == "" {
@@ -141,25 +147,25 @@ func EncryptFile(filename string) {
 }
 
 func DecryptFile(filename string) {
-	destfilename := GetBlob(filename)
-	log.Printf("Encrypt %s: %s", filename, destfilename)
-	pubkeys := ReadPubKeys()
-	privkey := ReadKey(GetBaseFile("gen/privkey/privkey.txt"))
-	file, err := os.OpenFile(filename, os.O_RDONLY, F_PRIV)
+	srcfilename := GetBlob(filename)
+	log.Printf("Decrypt %s: %s", filename, srcfilename)
+	// pubkeys := ReadPubKeys()
+	var kr openpgp.EntityList
+	kr = append(kr, ReadKey(GetBaseFile("gen/privkey/privkey.txt")))
+	// file, err := os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PRIV)
+	// Check(err)
+	// defer file.Close()
+	srcfile, err := os.OpenFile(srcfilename, os.O_RDONLY, F_PUB)
 	Check(err)
-	defer file.Close()
-	destfile, err := os.OpenFile(destfilename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PUB)
+	defer srcfile.Close()
+	areader, err := armor.Decode(srcfile)
 	Check(err)
-	defer destfile.Close()
-	(func() {
-		adestfile := ArmorIn(destfile, "PGP MESSAGE")
-		defer adestfile.Close()
-		writer, err := openpgp.Encrypt(adestfile, pubkeys, privkey, nil, Config)
-		Check(err)
-		defer writer.Close()
-		writer.Write([]byte("Test"))
-	})()
-	destfile.Write([]byte{10})
+	if areader.Type != "PGP MESSAGE" {
+		log.Panicf("Wrong block: %s\n", areader.Type)
+	}
+	message, err := openpgp.ReadMessage(areader.Body, kr, nil, Config)
+	Check(err)
+	Validate(message.IsSigned, "Message is not signed")
 }
 
 // ****************************************
