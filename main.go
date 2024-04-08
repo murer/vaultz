@@ -149,7 +149,7 @@ func EncryptFile(filename string) {
 func DecryptFile(filename string) {
 	srcfilename := GetBlob(filename)
 	log.Printf("Decrypt %s: %s", filename, srcfilename)
-	// pubkeys := ReadPubKeys()
+	pubkeys := ReadPubKeys()
 	var kr openpgp.EntityList
 	kr = append(kr, ReadKey(GetBaseFile("gen/privkey/privkey.txt")))
 	// file, err := os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PRIV)
@@ -168,6 +168,7 @@ func DecryptFile(filename string) {
 	Validate(msg.IsSigned, "Message is not signed")
 	Validate(msg.IsEncrypted, "Message it not encrypted")
 	Validate(!msg.IsSymmetricallyEncrypted, "Message is symmetrically encrypted")
+	Validate(len(pubkeys.KeysById(msg.SignedBy.PublicKey.KeyId+1)) > 0, "Message is not signed by any known key: %s", msg.SignedBy.PublicKey.KeyIdString())
 }
 
 // ****************************************
