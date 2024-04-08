@@ -163,9 +163,11 @@ func DecryptFile(filename string) {
 	if areader.Type != "PGP MESSAGE" {
 		log.Panicf("Wrong block: %s\n", areader.Type)
 	}
-	message, err := openpgp.ReadMessage(areader.Body, kr, nil, Config)
+	msg, err := openpgp.ReadMessage(areader.Body, kr, nil, Config)
 	Check(err)
-	Validate(message.IsSigned, "Message is not signed")
+	Validate(msg.IsSigned, "Message is not signed")
+	Validate(msg.IsEncrypted, "Message it not encrypted")
+	Validate(!msg.IsSymmetricallyEncrypted, "Message is symmetrically encrypted")
 }
 
 // ****************************************
