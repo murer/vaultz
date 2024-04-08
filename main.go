@@ -152,9 +152,6 @@ func DecryptFile(filename string) {
 	pubkeys := ReadPubKeys()
 	var kr openpgp.EntityList
 	kr = append(kr, ReadKey(GetBaseFile("gen/privkey/privkey.txt")))
-	// file, err := os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PRIV)
-	// Check(err)
-	// defer file.Close()
 	srcfile, err := os.OpenFile(srcfilename, os.O_RDONLY, F_PUB)
 	Check(err)
 	defer srcfile.Close()
@@ -169,6 +166,10 @@ func DecryptFile(filename string) {
 	Validate(!msg.IsSymmetricallyEncrypted, "Message is symmetrically encrypted")
 	Validate(msg.IsSigned, "Message is not signed")
 	Validate(len(pubkeys.KeysById(msg.SignedBy.PublicKey.KeyId)) > 0, "Message is not signed by any known key: %s", msg.SignedBy.PublicKey.KeyIdString())
+
+	file, err := os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PRIV)
+	Check(err)
+	defer file.Close()
 }
 
 // ****************************************
