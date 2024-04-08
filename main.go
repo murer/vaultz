@@ -170,6 +170,7 @@ func DecryptFile(filename string) {
 	file, err := os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY|os.O_CREATE, F_PRIV)
 	Check(err)
 	defer file.Close()
+	io.Copy(file, msg.LiteralData.Body)
 }
 
 // ****************************************
